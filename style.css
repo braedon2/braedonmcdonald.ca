@@ -2,6 +2,10 @@ html {
     font-family: sans-serif;
 }
 
+body {
+    padding: 1em;
+}
+
 nav {
     margin-top: 1em;
 }
@@ -31,7 +35,7 @@ h2 {
 }
 
 .page-heading {
-    font-size: 1.5em;
+    font-size: 1.9em;
     font-weight: normal;
     color: #0d122b;
 }
@@ -57,7 +61,6 @@ h2 {
 }
 
 .main-container {
-    padding: 1em;
     max-width: 680px;
     margin: auto;
     color: #434648;
@@ -82,8 +85,6 @@ h2 {
 
 .post-item {
     display: flex;
-    padding-top: 5px;
-    padding-bottom: 6px;
     justify-content: space-between;
     flex-direction: row;
     align-items: center;
@@ -106,4 +107,16 @@ h2 {
 .post-item a:focus {
     color: black; 
     text-decoration: underline;
+}
+
+.meta-info {
+    color: #6b7886;
+}
+
+.blog-content {
+    padding-top: 0.5em;
+}
+
+.blog-content p {
+    line-height: 1.8;
 }
