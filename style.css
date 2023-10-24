@@ -36,7 +36,7 @@ body {
     color: black;
     box-shadow: 6px 6px 0px black;
     display: inline-block;
-    padding: 0.5em 2em;
+    padding: 0.5em 1em;
 }
 
 .nav-link {
