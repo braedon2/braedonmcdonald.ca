@@ -10,14 +10,12 @@
     <link rel="shortcut icon" href="/images/little-guy-32x32.png" type="image/x-icon">
 </head>
 <body>
-    <header>
-        <div class="center">
-            <div class="title">
-                <h1>Braedon McDonald</h1>
-            </div>
+    <header class="bottom-padding-2">
+        <div class="center bottom-padding-1">
+                <h1 class="title">Braedon McDonald</h1>
         </div>
         <nav class="center">
-            <a class="nav-link"" href="/">home</a> |
+            <a class="nav-link" href="/">home</a> |
             <a class="nav-link" href="/blog.html">blog</a>
         </nav>
     </header>
@@ -26,13 +24,10 @@
         <p class="meta-info">October 8, 2023</p>
         <div class="blog-content">
             <p>
-                My niece has a wooden toy with LEDs and switches that turn them on and off. I think the toy is really cute and for a long time I thought it would be cool to make one that does something a bit more involved. This fall I finally got around to following through with this idea and made a binary adder inspired by my nieces toy. 
+                My niece has a toy that I constantly find myself playing with when I visit. It's a simple wooden box with some switches and LEDs on the front. Electronics wise, the switches are just wired to toggle certain LEDs but it's very fun to fiddle with and I find the overall design with the wooden enclosure very satisfying. For a long time I thought it would be cool to make something with a similar wooden enclosure that does something a bit more involved. This fall, I finally got around to following through with this idea and made something in the same spirit as my nieces toy except the LEDs and switches are connected to a binary adder. 
             </p>
             <p>
-                Overall I'm happy with how it turned out. It has a look and feel that is very similar to the box of switches and lights that my niece has.
-            </p>
-            <p>
-                I made it with a scrap piece of wood from my yard and a 74LS83 chip. The chip has all the logic for adding two binary numbers in a nice little breadboard friendly package.
+                I made it with a scrap piece of wood from my yard and a 74LS83 chip. The chip has all the logic for adding two binary numbers in a nice little breadboard friendly package. 
             </p>
             <figure>
                 <img src="/images/posts/binary-adder/finished.jpeg"
@@ -59,7 +54,7 @@
                 <figcaption>1 + 1 = 2</figcaption>
             </figure>
             <p>
-                The following image shows the addtion of 0111 + 0011 = 01010 or 7 + 3 = 10 in decimal.
+                The following image shows the addtion of 7 + 3 or 0111 + 0011 = 01010 in binary.
             </p>
             <figure>
                 <img src="/images/posts/binary-adder/example2.jpeg"
@@ -80,7 +75,7 @@
             </figure>
             <h2 class="page-subheading">Making it</h2>
             <p>
-                The circuit is straightfoward, I followed the <a href="/resources/7483.pdf">data sheet</a> for the 74LS83 chip to connect LEDs to the inputs and outputs. Then I added switches to control the inputs. The circuit is powered with a mini-USB breakout board. 
+                The circuit is straightfoward, I followed the <a href="/resources/7483.pdf">data sheet</a> for the 74LS83 chip to connect LEDs to the inputs and outputs. Then I added switches to control the inputs. The circuit is powered with a mini-USB breakout board. The breadboard circuit is what is used in the enclosure because I estimated it would be small enough to fit and I didn't want to go through the trouble of soldering a protytype board.
             </p>
             <figure>
                 <img src="/images/posts/binary-adder/circuit.jpeg"
@@ -107,7 +102,7 @@
                 <figcaption>The hollowed out enclosure</figcaption>
             </figure>
             <p>
-                Then holes were drilled for the LEDs and switches.
+                Then holes were drilled for the LEDs and switches on the front. A hole was drilled into the side for a power switch and another hole was drilled into the back for the usb connector. 
             </p>
             <figure>
                 <img src="/images/posts/binary-adder/holes.jpeg"
@@ -117,17 +112,17 @@
                 <figcaption>Drill holes</figcaption>
             </figure>
             <p>
-                After some staining and sanding, it's ready to be assembled.
+                After some sanding and a thin coat of finish, it's ready to be assembled.
             </p>
             <figure>
                 <img src="/images/posts/binary-adder/ready-to-assemble.jpeg"
-                        alt="Sanded and stained enclosure"
+                        alt="Sanded and finished enclosure"
                         loading="lazy"
                 />
-                <figcaption>Sanded and stained</figcaption>
+                <figcaption>Sanded and ready for assembling</figcaption>
             </figure>
             <p>
-                Then it was just a matter of mounting the LEDs and switches. Panel mount LED holders made this a breeze. Something that isn't shown is the hole drilled into the back to mount the USB port for power. 
+                Then it was just a matter of mounting the LEDs and switches. Panel mount LED holders made this a breeze. 
             </p>
             <figure>
                 <img src="/images/posts/binary-adder/testing.jpeg"
@@ -138,7 +133,7 @@
             </figure>
             <h2 class="page-subheading">Conclusion</h2>
             <p>
-                Being a software developper, it's fun to show off a physical project to people. It's also fun to fiddle with at my desk and makes a nice decoration.
+                Being a software developper, it's fun to show off a physical project to people. Originally, I wanted it to be battery powered like my nieces toy but space inside the enclosure ended up being too tight so I stuck with the USB connector. This worked out for the best since now I like to have it sitting on my desk turned on as a decoration.
             </p>
             <figure>
                 <img src="/images/posts/binary-adder/desk.jpeg"

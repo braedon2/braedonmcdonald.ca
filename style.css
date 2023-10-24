@@ -1,21 +1,42 @@
+h1, h2, h3, h3, h5, h6 {
+    margin: 0;
+    padding: 0;
+}
+
 html {
-    font-family: sans-serif;
+    font-family: Arial, Helvetica, sans-serif;
 }
 
 body {
     padding: 1em;
 }
 
-nav {
-    margin-top: 1em;
-}
+/* common classes */
 
-header {
-    padding-bottom: 2em;
-}
-
-h2 {
+.page-heading {
+    font-size: 1.9em;
     font-weight: normal;
+    color: #0d122b;
+}
+
+.meta-info {
+    color: #6b7886;
+}
+
+.main-container {
+    max-width: 680px;
+    margin: auto;
+    color: #434648;
+}
+
+/* header */
+
+.title {
+    background-color: #B0C4DE;
+    color: black;
+    box-shadow: 6px 6px 0px black;
+    display: inline-block;
+    padding: 0.5em 2em;
 }
 
 .nav-link {
@@ -29,35 +50,7 @@ h2 {
     text-decoration: underline;
 }
 
-.post-list {
-    padding-left: 0;
-    list-style: none;
-}
-
-.page-heading {
-    font-size: 1.9em;
-    font-weight: normal;
-    color: #0d122b;
-}
-
-.page-subheading {
-    font-size: 1.4em;
-    font-weight: normal;
-    color: #0d122b;
-    margin-top: 2em;
-}
-
-.center {
-    text-align: center;
-}
-
-.title {
-    background-color: #B0C4DE;
-    color: black;
-    box-shadow: 6px 6px 0px black;
-    display: inline-block;
-    padding: 0em 2em;
-}
+/* home page */
 
 .home-picture {
     width: 250px;
@@ -67,27 +60,11 @@ h2 {
     display: block;
 }
 
-.main-container {
-    max-width: 680px;
-    margin: auto;
-    color: #434648;
-}
+/* posts page */
 
-.content {
-    margin-left: auto;
-    margin-right: auto;
-    margin-top: 0;
-    margin-bottom: 0;
-    padding: 1em;
-    max-width: 80ch;
-}
-
-.introduction-wrapper > div{
-    width: 225px;
-}
-
-.bottom-padding-2 {
-    padding-bottom: 2em;
+.post-list {
+    padding-left: 0;
+    list-style: none;
 }
 
 .post-item {
@@ -105,7 +82,7 @@ h2 {
 
 .post-item:not(:first-child) {
     border-top: 1px solid #ececec; 
-  }
+    }
 
 .post-item-title {
     font-weight: normal;
@@ -115,15 +92,29 @@ h2 {
     text-decoration: none;
     color: #434648;
 }
-  
+    
 .post-item a:hover,
 .post-item a:focus {
     color: black; 
     text-decoration: underline;
 }
 
-.meta-info {
-    color: #6b7886;
+/* blog post */
+
+.page-subheading {
+    font-size: 1.4em;
+    font-weight: normal;
+    color: #0d122b;
+    margin-top: 2em;
+}
+
+.content {
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 0;
+    margin-bottom: 0;
+    padding: 1em;
+    max-width: 80ch;
 }
 
 .blog-content {
@@ -157,4 +148,16 @@ h2 {
     text-align: center;
 }
 
+/* utility classes */
 
+.bottom-padding-1 {
+    padding-bottom: 1em;
+}
+
+.bottom-padding-2 {
+    padding-bottom: 2em;
+}
+
+.center {
+    text-align: center;
+}
