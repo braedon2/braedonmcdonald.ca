@@ -11,6 +11,10 @@ body {
     padding: 1em;
 }
 
+video {
+    padding-bottom: 48px
+}
+
 /* common classes */
 
 .page-heading {
@@ -153,7 +157,20 @@ body {
     text-align: center;
 }
 
+/* guitar page */
+
+.video-title {
+    font-size: 1.4em;
+    font-weight: normal;
+    color: #0d122b;
+}
+
+.video-date {
+
+}
+
 /* utility classes */
+
 .top-padding-1 {
     padding-top: 1em;
 }
