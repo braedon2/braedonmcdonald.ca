@@ -175,6 +175,10 @@ video {
     padding-bottom: 0.5em;
 }
 
+.bottom-padding-025 {
+    padding-bottom: 0.25em;
+}
+
 .bottom-padding-1 {
     padding-bottom: 1em;
 }
