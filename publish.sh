@@ -1,3 +1,5 @@
-# braedonmcdonald@rp1
+# will create braedonmcdonald.ca on remote if it doesn't exist
+# -a for archive (preserve permissions and copy recursively) -P to show progress 
+# use --dry-run to test things
 
-rsync -aP --delete *.html style.css images posts videos rp1:/home/braedonmcdonald/braedonmcdonald.ca
+rsync -aP --delete *.html style.css images posts videos braedonmcdonald.ca:/var/www/braedonmcdonald.ca
