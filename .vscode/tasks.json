@@ -2,13 +2,33 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "echo",
+            "label": "publish (mac or linux)",
             "type": "shell",
-            "command": "./publish.sh",
+            "command": "./publish.sh"
+        },
+        {
+            "label": "upload guitar videos",
+            "type": "shell",
+            "command": "python",
+            "args": [
+                "${workspaceFolder}/website-generation/manage_guitar_videos.py",
+                "--upload"
+            ],
             "group": {
-                "kind": "build",
-                "isDefault": true
-              }
+                "kind": "build"
+            }
+        },
+        {
+            "label": "restore guitar videos",
+            "type": "shell",
+            "command": "python",
+            "args": [
+                "${workspaceFolder}/website-generation/manage_guitar_videos.py",
+                "--restore"
+            ],
+            "group": {
+                "kind": "build"
+            }
         }
     ]
 }
