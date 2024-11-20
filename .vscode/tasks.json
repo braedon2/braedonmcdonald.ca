@@ -29,6 +29,30 @@
             "group": {
                 "kind": "build"
             }
-        }
+        },
+        {
+            "label": "upload photo albums",
+            "type": "shell",
+            "command": "python",
+            "args": [
+                "${workspaceFolder}/website-generation/manage_photo_albums.py",
+                "--upload"
+            ],
+            "group": {
+                "kind": "build"
+            }
+        },
+        {
+            "label": "restore photo albums",
+            "type": "shell",
+            "command": "python",
+            "args": [
+                "${workspaceFolder}/website-generation/manage_photo_albums.py",
+                "--restore"
+            ],
+            "group": {
+                "kind": "build"
+            }
+        },
     ]
 }

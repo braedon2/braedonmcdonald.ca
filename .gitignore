@@ -1,4 +1,6 @@
 .DS_store
 guitar-videos/
+photo-albums/
+photo-albums.db
 config.py
 __pycache__
