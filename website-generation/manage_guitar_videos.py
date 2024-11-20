@@ -61,7 +61,6 @@ def upload():
 
 def restore():
     client = make_client()
-
     local_videos = []
     if not os.path.isdir(video_dir):
         os.mkdir(video_dir)
