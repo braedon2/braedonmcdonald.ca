@@ -2,7 +2,9 @@ import argparse
 import os
 import sys
 import sqlite3
+
 import boto3
+
 from config import object_storage_config
 
 bucket_name = 'braedonmcdonaldphotoalbums'
@@ -38,8 +40,9 @@ def make_db_con():
     cur.execute("""
         CREATE TABLE IF NOT EXISTS album(
             name, 
-            date_str,
-            UNIQUE(name, date_str))
+            start_date_str,
+            end_date_str,
+            UNIQUE(name, start_date_str, end_date_str))
     """)
     cur.execute("""
         CREATE TABLE IF NOT EXISTS photo(
@@ -47,7 +50,7 @@ def make_db_con():
             position, 
             album_id,
             FOREIGN KEY(album_id) REFERENCES album(id),
-            UNIQUE(filename, position, album_id))
+            UNIQUE(filename, album_id))
     """)
     return con
 
@@ -76,20 +79,29 @@ def upload_album(album_dirname):
     con = make_db_con()
     path = os.path.join(albums_dir, album_dirname)
     
-    album_name, date_str = album_dirname.split('_')
+    album_name, *date_strs = album_dirname.split('_')
     filenames = os.listdir(path)
     filenames.sort(key=lambda x: os.path.getmtime(os.path.join(path, x)))
 
     cur = con.cursor()
-    cur.execute(f'INSERT OR IGNORE INTO album VALUES (?, ?)', (album_name, date_str))
+    cur.execute(
+        f'INSERT OR IGNORE INTO album VALUES (?, ?, ?)', 
+        (album_name, date_strs[0], '' if len(date_strs) == 1 else date_strs[1]))
     con.commit()
     album_id = cur.execute(
-        f'SELECT rowid FROM album WHERE name = ? and date_str = ?', 
-        (album_name, date_str)).fetchone()[0]
+        f'SELECT rowid FROM album WHERE name = ? and start_date_str = ? and end_date_str = ?', 
+        (album_name, date_strs[0], '' if len(date_strs) == 1 else date_strs[1])).fetchone()[0]
 
     pos = 0
     uploaded = 0
     skipped = 0
+
+    res = cur.execute(
+        f'SELECT position FROM photo WHERE album_id = ?', 
+        (album_id,)).fetchall()
+    if res:
+        pos = max([x[0] for x in res])
+
     for filename in filenames:
         cur = con.cursor()
         cur.execute(f'INSERT OR IGNORE INTO photo VALUES(?, ?, ?)', (filename, pos, album_id))
