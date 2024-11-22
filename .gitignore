@@ -2,6 +2,7 @@
 guitar-videos/
 photo-albums/
 generated/
+venv
 photo-albums.db
 config.py
 __pycache__
