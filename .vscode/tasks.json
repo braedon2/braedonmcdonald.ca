@@ -9,7 +9,7 @@
         {
             "label": "upload guitar videos",
             "type": "shell",
-            "command": "python",
+            "command": "${command:python.interpreterPath}",
             "args": [
                 "${workspaceFolder}/website-generation/manage_guitar_videos.py",
                 "--upload"
@@ -21,7 +21,7 @@
         {
             "label": "restore guitar videos",
             "type": "shell",
-            "command": "python",
+            "command": "${command:python.interpreterPath}",
             "args": [
                 "${workspaceFolder}/website-generation/manage_guitar_videos.py",
                 "--restore"
@@ -33,7 +33,7 @@
         {
             "label": "upload photo albums",
             "type": "shell",
-            "command": "python",
+            "command": "${command:python.interpreterPath}",
             "args": [
                 "${workspaceFolder}/website-generation/manage_photo_albums.py",
                 "--upload"
@@ -45,7 +45,7 @@
         {
             "label": "restore photo albums",
             "type": "shell",
-            "command": "python",
+            "command": "${command:python.interpreterPath}",
             "args": [
                 "${workspaceFolder}/website-generation/manage_photo_albums.py",
                 "--restore"
