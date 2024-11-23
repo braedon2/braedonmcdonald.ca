@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html>
-
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -22,14 +21,15 @@
         </nav>
     </header>
     <div class="main-container">
-        <h1 class="page-heading bottom-padding-1">Posts</h1>
+        <h1 class="page-heading bottom-padding-1">Photo Albums</h1>
         <ul class="post-list">
+            {% for album in albums %}
             <li class="post-item">
-                <a href="/posts/binary-adder.html">Making a binary adder toy with scrap wood</a>
-                <p class="meta-info">Oct 08, 2023</p>
+                <a href="/photo-albums/{{ album.dirname }}.html">{{ album.name }}</a>
+                <p class="meta-info">{{ album.start_date_str }}{% if album.end_date_str %} - {{ album.end_date_str }}{% endif %}</p>
             </li>
+            {% endfor %}
         </ul>
     </div>
 </body>
-
 </html>

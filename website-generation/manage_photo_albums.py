@@ -42,7 +42,8 @@ def make_db_con():
             name, 
             start_date_str,
             end_date_str,
-            UNIQUE(name, start_date_str, end_date_str))
+            dirname,
+            UNIQUE(dirname))
     """)
     cur.execute("""
         CREATE TABLE IF NOT EXISTS photo(
@@ -80,17 +81,21 @@ def upload_album(album_dirname):
     path = os.path.join(albums_dir, album_dirname)
     
     album_name, *date_strs = album_dirname.split('_')
+    album_name = album_name.replace('-', ' ')
     filenames = os.listdir(path)
     filenames.sort(key=lambda x: os.path.getmtime(os.path.join(path, x)))
 
+    start_date_str = date_strs[0].replace('-', ' ')
+    end_date_str = date_strs[1].replace('-', ' ') if len(date_strs) == 2 else ''
+
     cur = con.cursor()
     cur.execute(
-        f'INSERT OR IGNORE INTO album VALUES (?, ?, ?)', 
-        (album_name, date_strs[0], '' if len(date_strs) == 1 else date_strs[1]))
+        f'INSERT OR IGNORE INTO album VALUES (?, ?, ?, ?)', 
+        (album_name, start_date_str, end_date_str, album_dirname))
     con.commit()
     album_id = cur.execute(
-        f'SELECT rowid FROM album WHERE name = ? and start_date_str = ? and end_date_str = ?', 
-        (album_name, date_strs[0], '' if len(date_strs) == 1 else date_strs[1])).fetchone()[0]
+        f'SELECT rowid FROM album WHERE dirname = ?', 
+        (album_dirname,)).fetchone()[0]
 
     pos = 0
     uploaded = 0

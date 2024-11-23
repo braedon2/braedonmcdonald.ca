@@ -54,5 +54,16 @@
                 "kind": "build"
             }
         },
+        {
+            "label": "generate site",
+            "type": "shell",
+            "command": "${command:python.interpreterPath}",
+            "args": [
+                "${workspaceFolder}/website-generation/generate_site.py"
+            ],
+            "group": {
+                "kind": "build"
+            }
+        },
     ]
 }
