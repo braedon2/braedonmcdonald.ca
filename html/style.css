@@ -165,6 +165,15 @@ video {
     color: #0d122b;
 }
 
+/* photo albums */
+.album-photo {
+    max-height: 90vh; /* 100% of the viewport height */
+    width: auto; /* Maintain aspect ratio */
+    object-fit: contain; /* Ensure image fits within the max-height without distortion */
+    display: block; /* Prevent images from being inline */
+    margin: 0 auto; /* Center the image horizontally */
+}
+
 /* utility classes */
 
 .top-padding-1 {

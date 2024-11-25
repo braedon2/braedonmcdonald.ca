@@ -45,6 +45,24 @@ def generate_photo_albums():
     with open('generated/photo_album_list.html', mode='w') as f:
         f.write(template.render({'albums': albums}))
 
+    os.mkdir('generated/photo-albums')
+    template = template_env.get_template('photo_album.html')
+
+    for dba in db_albums:
+        res = cur.execute(
+            "SELECT filename, position FROM photo WHERE album_id = ?", 
+            (dba['rowid'],)).fetchall()
+        res.sort(key=lambda x: x['position'])
+        filenames = [x['filename'] for x in res]
+
+        with open(f'generated/photo-albums/{dba['dirname']}.html', mode='w') as f:
+            f.write(template.render(
+                dirname=dba['dirname'],
+                album_name=dba['name'], 
+                start_date_str=dba['start_date_str'],
+                end_date_str=dba['end_date_str'],
+                filenames=filenames))
+
     con.close()
 
 if __name__ =="__main__":

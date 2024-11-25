@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Braedon McDonald</title>
+    <link rel="stylesheet" href="/style.css" />
+    <link rel="icon" href="/images/little-guy-32x32.png" type="image/x-icon">
+    <link rel="shortcut icon" href="/images/little-guy-32x32.png" type="image/x-icon">
+</head>
+<body>
+    <header class="bottom-padding-2">
+        <div class="center bottom-padding-1">
+            <h1 class="title">Braedon McDonald</h1>
+        </div>
+        <nav class="center">
+            <a class="nav-link" href="/">home</a> |
+            <a class="nav-link" href="/blog.html">blog</a> | 
+            <a class="nav-link" href="/guitar.html">guitar</a> | 
+            <a class="nav-link" href="/photo_album_list.html">photos</a>
+        </nav>
+    </header>
+    <div class="main-container">
+        <h1 class="page-heading bottom-padding-05">{{ album_name }}</h1>
+        <p class="meta-info bottom-padding-15">{{ start_date_str }}{% if end_date_str %} - {{ end_date_str }}{% endif %}</p>
+        <div class="blog-content">
+            {% for filename in filenames %}
+            <figure>
+                <img src="https://tor1.digitaloceanspaces.com/braedonmcdonaldphotoalbums/{{ dirname }}/{{ filename }}"
+                     loading="lazy" 
+                     class="album-photo"
+                />
+            </figure>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html>
