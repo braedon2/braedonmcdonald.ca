@@ -4,7 +4,7 @@ from PIL import Image
 
 yellow_text = '\033[93m'
 end_text_coloring = '\033[0m'
-compressed_image_suffix = '_compressed'
+compressed_image_suffix = '_resized'
 
 def compress_images(path):
     print(f'Compressing images in {path}')

@@ -50,7 +50,7 @@ def generate_photo_albums():
 
     for dba in db_albums:
         res = cur.execute(
-            "SELECT filename, position FROM photo WHERE album_id = ?", 
+            'SELECT filename, position FROM photo WHERE album_id = ? AND filename LIKE "%%_resized%%"', 
             (dba['rowid'],)).fetchall()
         res.sort(key=lambda x: x['position'])
         filenames = [x['filename'] for x in res]

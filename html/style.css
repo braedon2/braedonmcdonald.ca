@@ -1,4 +1,4 @@
-h1, h2, h3, h3, h5, h6, ul, li, p {
+h1, h2, h3, h3, h5, h6, ul, li, p, figure {
     margin: 0;
     padding: 0;
 }
@@ -134,27 +134,34 @@ video {
     padding-bottom: 1em;
 }
 
-.blog-content img {
+/* .blog-content img {
+    width: 100%;
+    display: block;
+    margin: auto;
+} */
+
+.blog-photo {
     width: 100%;
     display: block;
     margin: auto;
 }
 
-@media screen and (min-width: 480px) {
-.blog-content img {
-    width: 80%;
-}
-}
-
 .blog-content figure {
-    margin: 0;
     padding-bottom: 1em;
     width: 100%;
 }
 
+@media screen and (min-width: 480px) {
+.blog-content figure {
+    padding-bottom: 1em;
+    width: 80%;
+    margin: auto;
+}
+}
+
 .blog-content figcaption {
     line-height: 2;
-    text-align: center;
+    text-align: left;
 }
 
 /* guitar page */
@@ -166,6 +173,14 @@ video {
 }
 
 /* photo albums */
+@media screen and (min-width: 480px) {
+.album-photo {
+    max-height: 90vh;
+    max-width: 100%;
+    width: auto;
+}
+}
+
 .album-photo {
     max-height: 90vh; /* 100% of the viewport height */
     width: auto; /* Maintain aspect ratio */

@@ -4,6 +4,7 @@ import sys
 import sqlite3
 
 import boto3
+from PIL import Image
 
 from config import object_storage_config
 
@@ -55,6 +56,23 @@ def make_db_con():
     """)
     return con
 
+def resize_image(path: str, filename: str) -> str:
+    resized_filename = os.path.splitext(filename)[0] + "_resized.JPEG" 
+    max_width = 680
+
+    with Image.open(os.path.join(path, filename)) as image:
+        aspect_ratio = image.height / image.width
+        if image.width > max_width:
+            new_height = int(max_width * aspect_ratio)
+            image = image.resize((max_width, new_height))
+            image.format = 'JPEG'
+        image.save(
+            os.path.join(path, resized_filename), 
+            format='JPEG', 
+            quality='keep')
+
+    return resized_filename
+
 def upload_all_albums():
     client = make_client()
     response = client.list_buckets()
@@ -83,7 +101,7 @@ def upload_album(album_dirname):
     album_name, *date_strs = album_dirname.split('_')
     album_name = album_name.replace('-', ' ')
     filenames = os.listdir(path)
-    filenames.sort(key=lambda x: os.path.getmtime(os.path.join(path, x)))
+    filenames.sort(key=lambda x: os.path.getctime(os.path.join(path, x)))
 
     start_date_str = date_strs[0].replace('-', ' ')
     end_date_str = date_strs[1].replace('-', ' ') if len(date_strs) == 2 else ''
@@ -105,11 +123,13 @@ def upload_album(album_dirname):
         f'SELECT position FROM photo WHERE album_id = ?', 
         (album_id,)).fetchall()
     if res:
-        pos = max([x[0] for x in res])
+        pos = max([x[0] for x in res]) + 1
 
     for filename in filenames:
         cur = con.cursor()
-        cur.execute(f'INSERT OR IGNORE INTO photo VALUES(?, ?, ?)', (filename, pos, album_id))
+        cur.execute(
+            f'INSERT OR IGNORE INTO photo VALUES(?, ?, ?)', 
+            (filename, pos, album_id))
         con.commit()
         filepath = os.path.join(albums_dir, album_dirname, filename)
         if cur.lastrowid:
@@ -120,9 +140,23 @@ def upload_album(album_dirname):
                 f'{album_dirname}/{filename}', 
                 ExtraArgs={'ACL': 'public-read'})
             uploaded += 1
+            if "_resized" not in filename:
+                resized_filename = resize_image(path, filename)
+                filepath = os.path.join(albums_dir, album_dirname, resized_filename)
+                cur.execute(
+                    f'INSERT OR IGNORE INTO photo VALUES(?, ?, ?)', 
+                    (resized_filename, pos, album_id))
+                con.commit()
+                print(f'    Uploading {resized_filename}...')
+                client.upload_file(
+                    filepath, 
+                    bucket_name, 
+                    f'{album_dirname}/{resized_filename}', 
+                    ExtraArgs={'ACL': 'public-read'})
+                uploaded += 1
+            pos += 1
         else:
             skipped += 1
-        pos += 1
     
     print(f'    Uploaded {uploaded}')
     print(f'    Skipped {skipped}')
