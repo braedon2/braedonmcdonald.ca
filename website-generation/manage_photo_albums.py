@@ -4,7 +4,7 @@ import sys
 import sqlite3
 
 import boto3
-from PIL import Image
+from PIL import Image, ImageOps
 
 from config import object_storage_config
 
@@ -35,32 +35,12 @@ def make_client():
         aws_secret_access_key=object_storage_config['api_secret_key']
     )
 
-def make_db_con():
-    con = sqlite3.connect("photo-albums.db")
-    cur = con.cursor()
-    cur.execute("""
-        CREATE TABLE IF NOT EXISTS album(
-            name, 
-            start_date_str,
-            end_date_str,
-            dirname,
-            UNIQUE(dirname))
-    """)
-    cur.execute("""
-        CREATE TABLE IF NOT EXISTS photo(
-            filename, 
-            position, 
-            album_id,
-            FOREIGN KEY(album_id) REFERENCES album(id),
-            UNIQUE(filename, album_id))
-    """)
-    return con
-
 def resize_image(path: str, filename: str) -> str:
     resized_filename = os.path.splitext(filename)[0] + "_resized.JPEG" 
     max_width = 680
 
     with Image.open(os.path.join(path, filename)) as image:
+        image = ImageOps.exif_transpose(image)
         aspect_ratio = image.height / image.width
         if image.width > max_width:
             new_height = int(max_width * aspect_ratio)
@@ -73,7 +53,7 @@ def resize_image(path: str, filename: str) -> str:
 
     return resized_filename
 
-def upload_all_albums():
+def upload_all_albums(conn):
     client = make_client()
     response = client.list_buckets()
     existing_buckets = [bucket['Name'] for bucket in response['Buckets']]
@@ -85,17 +65,16 @@ def upload_all_albums():
 
     album_dirs = os.listdir(albums_dir)
     for album_dirname in album_dirs:
-        result = upload_album(album_dirname)
+        result = upload_album(conn, album_dirname)
         total_uploaded += result['uploaded']
         total_skipped += result['skipped']
 
     print(f'Total uploaded: {total_uploaded}')
     print(f'Total skipped: {total_skipped}')
 
-def upload_album(album_dirname):
+def upload_album(conn, album_dirname):
     print(f'uploading {album_dirname}...')
     client = make_client()
-    con = make_db_con()
     path = os.path.join(albums_dir, album_dirname)
     
     album_name, *date_strs = album_dirname.split('_')
@@ -106,11 +85,11 @@ def upload_album(album_dirname):
     start_date_str = date_strs[0].replace('-', ' ')
     end_date_str = date_strs[1].replace('-', ' ') if len(date_strs) == 2 else ''
 
-    cur = con.cursor()
+    cur = conn.cursor()
     cur.execute(
         f'INSERT OR IGNORE INTO album VALUES (?, ?, ?, ?)', 
         (album_name, start_date_str, end_date_str, album_dirname))
-    con.commit()
+    conn.commit()
     album_id = cur.execute(
         f'SELECT rowid FROM album WHERE dirname = ?', 
         (album_dirname,)).fetchone()[0]
@@ -126,11 +105,11 @@ def upload_album(album_dirname):
         pos = max([x[0] for x in res]) + 1
 
     for filename in filenames:
-        cur = con.cursor()
+        cur = conn.cursor()
         cur.execute(
             f'INSERT OR IGNORE INTO photo VALUES(?, ?, ?)', 
             (filename, pos, album_id))
-        con.commit()
+        conn.commit()
         filepath = os.path.join(albums_dir, album_dirname, filename)
         if cur.lastrowid:
             print(f'    Uploading {filename}...')
@@ -146,7 +125,7 @@ def upload_album(album_dirname):
                 cur.execute(
                     f'INSERT OR IGNORE INTO photo VALUES(?, ?, ?)', 
                     (resized_filename, pos, album_id))
-                con.commit()
+                conn.commit()
                 print(f'    Uploading {resized_filename}...')
                 client.upload_file(
                     filepath, 
@@ -160,7 +139,7 @@ def upload_album(album_dirname):
     
     print(f'    Uploaded {uploaded}')
     print(f'    Skipped {skipped}')
-    con.close()
+    conn.close()
     return {'uploaded': uploaded, 'skipped': skipped}
 
 def restore_albums():
@@ -177,7 +156,8 @@ if __name__ == '__main__':
         exit()
     if args.upload:
         print(f"Uploading photo albums...")
-        upload_all_albums()
+        conn = sqlite3.connect('photo-albums.db')
+        upload_all_albums(conn)
     if args.restore:
         print("Restoring photo albums...")
         restore_albums()

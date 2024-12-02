@@ -134,29 +134,22 @@ video {
     padding-bottom: 1em;
 }
 
-/* .blog-content img {
-    width: 100%;
-    display: block;
-    margin: auto;
-} */
-
 .blog-photo {
     width: 100%;
     display: block;
     margin: auto;
 }
 
-.blog-content figure {
-    padding-bottom: 1em;
-    width: 100%;
-}
-
 @media screen and (min-width: 480px) {
-.blog-content figure {
-    padding-bottom: 1em;
+.blog-photo {
     width: 80%;
+    display: block;
     margin: auto;
 }
+}
+
+.blog-content figure {
+    padding-bottom: 1em;
 }
 
 .blog-content figcaption {
@@ -183,10 +176,11 @@ video {
 
 .album-photo {
     max-height: 90vh; /* 100% of the viewport height */
-    width: auto; /* Maintain aspect ratio */
+    /* width: auto; */
     object-fit: contain; /* Ensure image fits within the max-height without distortion */
     display: block; /* Prevent images from being inline */
     margin: 0 auto; /* Center the image horizontally */
+    max-width: 100%;
 }
 
 /* utility classes */
