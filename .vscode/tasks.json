@@ -55,6 +55,30 @@
             }
         },
         {
+            "label": "backup db",
+            "type": "shell",
+            "command": "${command:python.interpreterPath}",
+            "args": [
+                "${workspaceFolder}/website-generation/manage_photo_albums_db.py",
+                "--backup"
+            ],
+            "group": {
+                "kind": "build"
+            }
+        },
+        {
+            "label": "restore db",
+            "type": "shell",
+            "command": "${command:python.interpreterPath}",
+            "args": [
+                "${workspaceFolder}/website-generation/manage_photo_albums_db.py",
+                "--restore"
+            ],
+            "group": {
+                "kind": "build"
+            }
+        },
+        {
             "label": "generate site",
             "type": "shell",
             "command": "${command:python.interpreterPath}",

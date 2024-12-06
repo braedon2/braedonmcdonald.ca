@@ -1,7 +1,7 @@
 import argparse
 import os
-import sys
 import sqlite3
+import sys
 
 import boto3
 from PIL import Image, ImageOps
