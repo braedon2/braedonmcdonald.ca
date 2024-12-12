@@ -89,5 +89,16 @@
                 "kind": "build"
             }
         },
+        {
+            "label": "edit photo albums",
+            "type": "shell",
+            "command": "${command:python.interpreterPath}",
+            "args": [
+                "${workspaceFolder}/website-generation/edit_photo_albums.py"
+            ],
+            "group": {
+                "kind": "build"
+            }
+        }
     ]
 }
