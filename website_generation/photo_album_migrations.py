@@ -45,6 +45,12 @@ migrations = [
     migration_001
 ]
 
+def run_migrations(db_path):
+    conn = sqlite3.connect(db_path)
+    initialize_version_table(conn)
+    apply_migrations(conn, migrations)
+    conn.close()
+
 if __name__ == '__main__':
     conn = sqlite3.connect("photo-albums.db")
     initialize_version_table(conn)
