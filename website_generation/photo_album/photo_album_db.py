@@ -1,7 +1,10 @@
 from __future__ import annotations
 
-import sqlite3
 from datetime import datetime
+import sqlite3
+
+class IncompatiblePhotoListException(Exception):
+    pass
 
 class Album:
     def __init__(
@@ -77,10 +80,50 @@ class PhotoAlbumDb:
         rows = res.fetchall()
         return [Album.from_db_row(row) for row in rows]
     
-    def get_resized_album_photos(self, album_id: int):
+    def get_resized_album_photos(self, album_id: int) -> list[Photo]:
         res = self.conn.execute(
-            'SELECT rowid, * WHERE album_id = ? AND filename LIKE "%%_resized%%"', 
+            '''
+            SELECT rowid, * 
+            FROM photo 
+            WHERE album_id = ? AND filename LIKE "%%_resized%%"
+            ''', 
             (album_id,))
         rows = res.fetchall()
         return [Photo.from_db_row(row) for row in rows]
     
+    def get_nonresized_album_photos(self, album_id: int) -> list[Photo]:
+        res = self.conn.execute(
+            '''
+            SELECT rowid, * 
+            FROM photo 
+            WHERE album_id = ? AND filename NOT LIKE "%%_resized%%"
+            ''', 
+            (album_id,))
+        rows = res.fetchall()
+        return [Photo.from_db_row(row) for row in rows]
+
+    def update_photos_with_new_order(self, photos: list[Photo]) -> None:
+        """
+        Updates each photos position to match its index in the input list.
+        Updates both the photo and its non-resized counterpart.
+        Input list must be resized photos only
+        Input list's positions are mutated in place before being saved to db.
+        """
+        if not all('_resized' in photo.filename for photo in photos):
+            raise IncompatiblePhotoListException('All photos must be resized')
+        if not all(photo.rowid for photo in photos):
+            raise IncompatiblePhotoListException('All photos must have rowids')
+        
+        for i, photo in enumerate(photos):
+            photo.position = i
+            self.conn.execute("""
+                UPDATE photo
+                SET position = ?
+                WHERE rowid = ?""",
+                (i, photo.rowid))
+            self.conn.execute("""
+                UPDATE photo
+                SET position = ?
+                WHERE filename = ?""",
+                (i, photo.filename.replace('_resized', '')))
+            

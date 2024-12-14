@@ -21,9 +21,12 @@ def populated_db_path(empty_db_path) -> str:
         ("Gaspe", "Aug 2023", "", "Gaspe_Aug-2023"))
     cur.executemany('INSERT INTO photo VALUES (?, ?, ?)',
         [
-            ("123.jpg", 0, cur.lastrowid),
-            ("345.jpg", 1, cur.lastrowid),
-            ("678.jpg", 2, cur.lastrowid)
+            ("123.jpg", 1, cur.lastrowid),
+            ("123_resized.jpg", 1, cur.lastrowid),
+            ("345.jpg", 0, cur.lastrowid),
+            ("345_resized.jpg", 0, cur.lastrowid),
+            ("678.jpg", 2, cur.lastrowid),
+            ("678_resized.jpg", 2, cur.lastrowid),
         ])
     conn.commit()
     cur.execute('INSERT INTO album VALUES (?, ?, ?, ?)',
@@ -31,8 +34,11 @@ def populated_db_path(empty_db_path) -> str:
     cur.executemany('INSERT INTO photo VALUES (?, ?, ?)',
         [
             ("123.jpg", 0, cur.lastrowid),
+            ("123_resized.jpg", 0, cur.lastrowid),
             ("345.jpg", 1, cur.lastrowid),
-            ("678.jpg", 2, cur.lastrowid)
+            ("345_resized.jpg", 1, cur.lastrowid),
+            ("678.jpg", 2, cur.lastrowid),
+            ("678_resized.jpg", 2, cur.lastrowid),
         ])
     conn.commit()
     cur.execute('INSERT INTO album VALUES (?, ?, ?, ?)',
@@ -40,8 +46,11 @@ def populated_db_path(empty_db_path) -> str:
     cur.executemany('INSERT INTO photo VALUES (?, ?, ?)',
         [
             ("123.jpg", 0, cur.lastrowid),
+            ("123_resized.jpg", 0, cur.lastrowid),
             ("345.jpg", 1, cur.lastrowid),
-            ("678.jpg", 2, cur.lastrowid)
+            ("345_resized.jpg", 1, cur.lastrowid),
+            ("678.jpg", 2, cur.lastrowid),
+            ("678_resized.jpg", 2, cur.lastrowid),
         ])
     conn.commit()
     conn.close()
@@ -54,7 +63,37 @@ def populated_db_object(populated_db_path):
     db.close()
 
 def test_get_albums_sortable(populated_db_object):
+    # act
     albums = populated_db_object.get_albums()
     albums.sort()
 
     assert albums[0].name == "Test1"
+
+def test_get_resized_album_photos_sortable(populated_db_object):
+    #act
+    photos = populated_db_object.get_resized_album_photos(1)
+    photos.sort()
+
+    assert all("_resized" in photo.filename for photo in photos)
+    assert all(photo.position == i for i, photo in enumerate(photos))
+
+def test_update_photos_with_new_order(populated_db_object):
+    # arrange
+    photos = populated_db_object.get_resized_album_photos(2)
+    photos.sort(reverse=True)
+
+    # act 
+    populated_db_object.update_photos_with_new_order(photos)
+    
+    updated_db_resized_photos = populated_db_object.get_resized_album_photos(2)
+    updated_db_resized_photos.sort()
+    updated_nonresized_photos = populated_db_object.get_nonresized_album_photos(2)
+    updated_nonresized_photos.sort()
+    
+    assert all(photo.position == i for i, photo in enumerate(photos))
+    assert updated_db_resized_photos[0].filename == '678_resized.jpg'
+    assert updated_db_resized_photos[1].filename == '345_resized.jpg'
+    assert updated_db_resized_photos[2].filename == '123_resized.jpg'
+    assert updated_nonresized_photos[0].filename == '678.jpg'
+    assert updated_nonresized_photos[1].filename == '345.jpg'
+    assert updated_nonresized_photos[2].filename == '123.jpg'
