@@ -11,7 +11,7 @@
             "type": "shell",
             "command": "${command:python.interpreterPath}",
             "args": [
-                "${workspaceFolder}/website-generation/manage_guitar_videos.py",
+                "${workspaceFolder}/website_generation/manage_guitar_videos.py",
                 "--upload"
             ],
             "group": {
@@ -23,7 +23,7 @@
             "type": "shell",
             "command": "${command:python.interpreterPath}",
             "args": [
-                "${workspaceFolder}/website-generation/manage_guitar_videos.py",
+                "${workspaceFolder}/website_generation/manage_guitar_videos.py",
                 "--restore"
             ],
             "group": {
@@ -35,7 +35,7 @@
             "type": "shell",
             "command": "${command:python.interpreterPath}",
             "args": [
-                "${workspaceFolder}/website-generation/manage_photo_albums.py",
+                "${workspaceFolder}/website_generation/manage_photo_albums.py",
                 "--upload"
             ],
             "group": {
@@ -47,7 +47,7 @@
             "type": "shell",
             "command": "${command:python.interpreterPath}",
             "args": [
-                "${workspaceFolder}/website-generation/manage_photo_albums.py",
+                "${workspaceFolder}/website_generation/manage_photo_albums.py",
                 "--restore"
             ],
             "group": {
@@ -59,7 +59,7 @@
             "type": "shell",
             "command": "${command:python.interpreterPath}",
             "args": [
-                "${workspaceFolder}/website-generation/manage_photo_albums_db.py",
+                "${workspaceFolder}/website_generation/manage_photo_albums_db.py",
                 "--backup"
             ],
             "group": {
@@ -71,7 +71,7 @@
             "type": "shell",
             "command": "${command:python.interpreterPath}",
             "args": [
-                "${workspaceFolder}/website-generation/manage_photo_albums_db.py",
+                "${workspaceFolder}/website_generation/manage_photo_albums_db.py",
                 "--restore"
             ],
             "group": {
@@ -83,7 +83,7 @@
             "type": "shell",
             "command": "${command:python.interpreterPath}",
             "args": [
-                "${workspaceFolder}/website-generation/generate_site.py"
+                "${workspaceFolder}/website_generation/generate_site.py"
             ],
             "group": {
                 "kind": "build"
@@ -94,7 +94,7 @@
             "type": "shell",
             "command": "${command:python.interpreterPath}",
             "args": [
-                "${workspaceFolder}/website-generation/edit_photo_albums.py"
+                "${workspaceFolder}/website_generation/edit_photo_albums.py"
             ],
             "group": {
                 "kind": "build"

@@ -71,6 +71,7 @@ def upload_all_albums(conn):
 
     print(f'Total uploaded: {total_uploaded}')
     print(f'Total skipped: {total_skipped}')
+    conn.close()
 
 def upload_album(conn, album_dirname):
     print(f'uploading {album_dirname}...')
@@ -139,7 +140,6 @@ def upload_album(conn, album_dirname):
     
     print(f'    Uploaded {uploaded}')
     print(f'    Skipped {skipped}')
-    conn.close()
     return {'uploaded': uploaded, 'skipped': skipped}
 
 def restore_albums():
