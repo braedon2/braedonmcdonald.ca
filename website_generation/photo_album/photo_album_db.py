@@ -80,6 +80,17 @@ class PhotoAlbumDb:
         rows = res.fetchall()
         return [Album.from_db_row(row) for row in rows]
     
+    def get_album_photos(self, album_id: int) -> list[Photo]:
+        res = self.conn.execute(
+            '''
+            SELECT rowid, * 
+            FROM photo 
+            WHERE album_id = ?
+            ''', 
+            (album_id,))
+        rows = res.fetchall()
+        return [Photo.from_db_row(row) for row in rows]
+    
     def get_resized_album_photos(self, album_id: int) -> list[Photo]:
         res = self.conn.execute(
             '''

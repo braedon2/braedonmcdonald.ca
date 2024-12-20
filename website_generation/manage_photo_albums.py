@@ -6,7 +6,10 @@ import sys
 import boto3
 from PIL import Image, ImageOps
 
-from config import object_storage_config
+from config import object_storage_config, photo_album_db_path, photo_albums_root, photo_albums_bucket
+from photo_album.photo_album_db import Album, Photo, PhotoAlbumDb
+from photo_album.photo_album_cloud import PhotoAlbumCloud
+from photo_album.photo_album_filesystem import PhotoAlbumFileSystem
 
 bucket_name = 'braedonmcdonaldphotoalbums'
 albums_dir = 'photo-albums'
@@ -143,7 +146,28 @@ def upload_album(conn, album_dirname):
     return {'uploaded': uploaded, 'skipped': skipped}
 
 def restore_albums():
-    pass
+    db = PhotoAlbumDb(photo_album_db_path)
+    cloud = PhotoAlbumCloud(
+        object_storage_config['api_access_key'],
+        object_storage_config['api_secret_key'],
+        photo_albums_bucket,
+        photo_albums_root
+    )
+    fs = PhotoAlbumFileSystem(photo_albums_root)
+
+    for album in db.get_albums():
+        print(f'Restoring {album.dirname}')
+        db_photos = db.get_album_photos(album.rowid)
+        for photo in db_photos:
+            print(f'    Restoring {photo.filename}')
+            cloud.download(album, photo)
+        print(f'Syncing {album.dirname} with database')
+        cleaned = fs.clean_dir(album, db_photos)
+        print(f'    Removed {cleaned} photos')
+
+    print('Removing dangling albums')
+    removed = fs.remove_dangling_albums(db.get_albums())
+    print(f'    Removed {' '.join(removed)}')
 
 if __name__ == '__main__':
     parser = make_parser()
