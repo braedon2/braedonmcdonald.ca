@@ -11,11 +11,12 @@ def make_parser():
     parser = argparse.ArgumentParser(
         description='Tool for uploading and restoring guitar videos from digital ocean spaces',
     )
-    parser.add_argument(
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument(
         '-u', '--upload', action='store_true',
         help='Upload guitar videos to cloud bucket, skipping ones that have already been uploaded'
     )
-    parser.add_argument(
+    group.add_argument(
         '-r', '--restore', action='store_true',
         help='Restore guitar videos stored in the cloud to local dir'
     )
@@ -79,12 +80,6 @@ def restore():
 if __name__ == '__main__':
     parser = make_parser()
     args = parser.parse_args()
-    if len(sys.argv) == 1:
-        parser.print_help()
-        exit()
-    if args.upload and args.restore:
-        print('Must supply either "upload" or "restore" as argument, not both')
-        exit()
     if args.upload:
         print("Uploading new guitar videos...")
         upload()
