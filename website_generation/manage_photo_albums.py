@@ -6,7 +6,7 @@ import sys
 import boto3
 from PIL import Image, ImageOps
 
-from config import object_storage_config, photo_album_db_path, photo_albums_root, photo_albums_bucket
+from config import Config, TestConfig
 from photo_album.photo_album_db import Album, Photo, PhotoAlbumDb
 from photo_album.photo_album_cloud import PhotoAlbumCloud
 from photo_album.photo_album_filesystem import PhotoAlbumFileSystem
@@ -34,8 +34,8 @@ def make_client():
         's3',
         region_name='tor1',
         endpoint_url='https://tor1.digitaloceanspaces.com',
-        aws_access_key_id=object_storage_config['api_access_key'],
-        aws_secret_access_key=object_storage_config['api_secret_key']
+        aws_access_key_id=Config.api_access_key,
+        aws_secret_access_key=Config.api_secret_key
     )
 
 def resize_image(path: str, filename: str) -> str:
@@ -146,14 +146,10 @@ def upload_album(conn, album_dirname):
     return {'uploaded': uploaded, 'skipped': skipped}
 
 def restore_albums():
-    db = PhotoAlbumDb(photo_album_db_path)
-    cloud = PhotoAlbumCloud(
-        object_storage_config['api_access_key'],
-        object_storage_config['api_secret_key'],
-        photo_albums_bucket,
-        photo_albums_root
-    )
-    fs = PhotoAlbumFileSystem(photo_albums_root)
+    config = Config()
+    db = PhotoAlbumDb(config)
+    cloud = PhotoAlbumCloud(config)
+    fs = PhotoAlbumFileSystem(config)
 
     for album in db.get_albums():
         print(f'Restoring {album.dirname}')

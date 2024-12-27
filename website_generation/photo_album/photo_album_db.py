@@ -3,6 +3,8 @@ from __future__ import annotations
 from datetime import datetime
 import sqlite3
 
+from config import AbstractConfig
+
 class IncompatiblePhotoListException(Exception):
     pass
 
@@ -68,8 +70,9 @@ class Photo:
         )
 
 class PhotoAlbumDb:
-    def __init__(self, db_path: str):
-        self.conn = sqlite3.connect(db_path)
+    def __init__(self, config: AbstractConfig):
+        self.config = config
+        self.conn = sqlite3.connect(self.config.photo_albums_db_path)
         self.conn.row_factory = sqlite3.Row 
 
     def close(self):

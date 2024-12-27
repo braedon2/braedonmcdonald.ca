@@ -4,7 +4,7 @@ import sys
 
 import boto3
 
-from config import object_storage_config
+from config import Config
 
 bucket_name = 'braedonmcdonaldphotoalbumsdbbackup'
 db_name = 'photo-albums.db'
@@ -29,15 +29,15 @@ def make_client():
         's3',
         region_name='tor1',
         endpoint_url='https://tor1.digitaloceanspaces.com',
-        aws_access_key_id=object_storage_config['api_access_key'],
-        aws_secret_access_key=object_storage_config['api_secret_key']
+        aws_access_key_id=Config.api_access_key,
+        aws_secret_access_key=Config.api_secret_key
     )
 
 def get_bucket_resource():
     session = boto3.session.Session(
         region_name='tor1',
-        aws_access_key_id=object_storage_config['api_access_key'],
-        aws_secret_access_key=object_storage_config['api_secret_key']
+        aws_access_key_id=Config.api_access_key,
+        aws_secret_access_key=Config.api_secret_key
     )
     resource = session.resource(
         's3', 

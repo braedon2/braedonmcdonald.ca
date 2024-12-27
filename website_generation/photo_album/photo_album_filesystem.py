@@ -1,10 +1,12 @@
 import os
 import shutil
+
+from config import AbstractConfig
 from photo_album.photo_album_db import Album, Photo
 
 class PhotoAlbumFileSystem:
-    def __init__(self, root_dir: str):
-        self.root_dir = root_dir
+    def __init__(self, config: AbstractConfig):
+        self.root_dir = config.photo_albums_root
 
     def clean_dir(self, album: Album, db_photos: list[Photo]) -> int:
         dir_path = os.path.join(self.root_dir, album.dirname)
