@@ -6,6 +6,7 @@ class AbstractConfig(metaclass=ABCMeta):
     api_secret_key = 'yourverysecretkey'
     api_access_key = 'youraccesskey'
     templates_path = 'absolute/path/to/templates'
+    db_backup_bucket = 'braedonmcdonaldphotoalbumsdbbackup'
 
     @property
     @abstractmethod

@@ -1,7 +1,6 @@
 import argparse
 import os
 from sqlite3 import connect, Connection
-import sys
 
 import boto3
 from PIL import Image, ImageOps
