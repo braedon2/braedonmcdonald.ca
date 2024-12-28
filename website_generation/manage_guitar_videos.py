@@ -42,9 +42,6 @@ def get_video_keys(client):
 def upload():
     client = make_client()
     response = client.list_buckets()
-    existing_buckets = [bucket['Name'] for bucket in response['Buckets']]
-    if bucket_name not in existing_buckets:
-        client.create_bucket(Bucket=bucket_name)
 
     response = client.list_objects_v2(Bucket=bucket_name)
     cloud_videos = []
@@ -86,5 +83,3 @@ if __name__ == '__main__':
     if args.restore:
         print("Restoring guitar videos...")
         restore()
-
-

@@ -10,12 +10,20 @@ class PhotoAlbumCloud:
             's3',
             region_name='tor1',
             endpoint_url='https://tor1.digitaloceanspaces.com',
-            aws_access_key_id=self.config.api_secret_key,
-            aws_secret_access_key=self.config.api_access_key
+            aws_secret_access_key=self.config.api_secret_key,
+            aws_access_key_id=self.config.api_access_key
         )
+        self.bucket = boto3.Session(
+            region_name='tor1',
+            aws_access_key_id=config.api_access_key,
+            aws_secret_access_key=config.api_secret_key
+        ).resource(
+            's3',
+            endpoint_url='https://tor1.digitaloceanspaces.com'
+        ).Bucket(config.photo_albums_bucket)
 
     def download(self, album: Album, photo: Photo):
-        object_key = os.path.join(album.dirname, photo.filename)
+        object_key = f'{album.dirname}/{photo.filename}'
         download_dir = os.path.join(self.config.photo_albums_root, album.dirname)
         filepath = os.path.join(download_dir, photo.filename)
         

@@ -23,6 +23,9 @@ class Album:
         self.end_date_str = end_date_str
         self.start_date = self.parse_date(start_date_str)
 
+        # not needed but want to throw an exception if string has bad format
+        self.end_date = self.parse_date(end_date_str) if end_date_str else None
+
     def __lt__(self, album: Album) -> bool:
         return self.start_date < album.start_date
 

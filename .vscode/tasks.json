@@ -99,6 +99,45 @@
             "group": {
                 "kind": "build"
             }
-        }
+        },
+        {
+            "label": "test upload photo albums",
+            "type": "shell",
+            "command": "${command:python.interpreterPath}",
+            "args": [
+                "${workspaceFolder}/website_generation/manage_photo_albums.py",
+                "--upload", "--test"
+            ],
+            "group": "test"
+        },
+        {
+            "label": "test restore photo albums",
+            "type": "shell",
+            "command": "${command:python.interpreterPath}",
+            "args": [
+                "${workspaceFolder}/website_generation/manage_photo_albums.py",
+                "--restore", "--test"
+            ],
+            "group": "test"
+        },
+        {
+            "label": "reset test env",
+            "type": "shell",
+            "command": "${command:python.interpreterPath}",
+            "args": [
+                "${workspaceFolder}/website_generation/reset_test_env.py"
+            ],
+            "group": "test"
+        },
+        {
+            "label": "generate test site",
+            "type": "shell",
+            "command": "${command:python.interpreterPath}",
+            "args": [
+                "${workspaceFolder}/website_generation/generate_site.py",
+                "--test"
+            ],
+            "group": "test"
+        },
     ]
 }

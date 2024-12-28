@@ -1,18 +1,15 @@
 import argparse
 import os
-import sqlite3
+from sqlite3 import connect, Connection
 import sys
 
 import boto3
 from PIL import Image, ImageOps
 
-from config import Config, TestConfig
+from config import AbstractConfig, Config, TestConfig
 from photo_album.photo_album_db import Album, Photo, PhotoAlbumDb
 from photo_album.photo_album_cloud import PhotoAlbumCloud
 from photo_album.photo_album_filesystem import PhotoAlbumFileSystem
-
-bucket_name = 'braedonmcdonaldphotoalbums'
-albums_dir = 'photo-albums'
 
 def make_parser():
     parser = argparse.ArgumentParser(
@@ -33,14 +30,14 @@ def make_parser():
     )
     return parser
 
-def make_client():
+def make_client(config: AbstractConfig):
     session = boto3.session.Session()
     return session.client(
         's3',
         region_name='tor1',
         endpoint_url='https://tor1.digitaloceanspaces.com',
-        aws_access_key_id=Config.api_access_key,
-        aws_secret_access_key=Config.api_secret_key
+        aws_access_key_id=config.api_access_key,
+        aws_secret_access_key=config.api_secret_key
     )
 
 def resize_image(path: str, filename: str) -> str:
@@ -61,30 +58,25 @@ def resize_image(path: str, filename: str) -> str:
 
     return resized_filename
 
-def upload_all_albums(conn):
-    client = make_client()
-    response = client.list_buckets()
-    existing_buckets = [bucket['Name'] for bucket in response['Buckets']]
-    if bucket_name not in existing_buckets:
-        client.create_bucket(Bucket=bucket_name)
-
+def upload_all_albums(config: AbstractConfig):
     total_uploaded = 0
     total_skipped = 0
+    conn = connect(config.photo_albums_db_path)
 
-    album_dirs = os.listdir(albums_dir)
+    album_dirs = os.listdir(config.photo_albums_root)
     for album_dirname in album_dirs:
-        result = upload_album(conn, album_dirname)
+        result = upload_album(conn, config, album_dirname)
         total_uploaded += result['uploaded']
         total_skipped += result['skipped']
 
+    conn.close()
     print(f'Total uploaded: {total_uploaded}')
     print(f'Total skipped: {total_skipped}')
-    conn.close()
 
-def upload_album(conn, album_dirname):
+def upload_album(conn: Connection, config: AbstractConfig, album_dirname: str):
     print(f'uploading {album_dirname}...')
-    client = make_client()
-    path = os.path.join(albums_dir, album_dirname)
+    client = make_client(config)
+    path = os.path.join(config.photo_albums_root, album_dirname)
     
     album_name, *date_strs = album_dirname.split('_')
     album_name = album_name.replace('-', ' ')
@@ -119,18 +111,18 @@ def upload_album(conn, album_dirname):
             f'INSERT OR IGNORE INTO photo VALUES(?, ?, ?)', 
             (filename, pos, album_id))
         conn.commit()
-        filepath = os.path.join(albums_dir, album_dirname, filename)
+        filepath = os.path.join(config.photo_albums_root, album_dirname, filename)
         if cur.lastrowid:
             print(f'    Uploading {filename}...')
             client.upload_file(
                 filepath, 
-                bucket_name, 
+                config.photo_albums_bucket, 
                 f'{album_dirname}/{filename}', 
                 ExtraArgs={'ACL': 'public-read'})
             uploaded += 1
             if "_resized" not in filename:
                 resized_filename = resize_image(path, filename)
-                filepath = os.path.join(albums_dir, album_dirname, resized_filename)
+                filepath = os.path.join(config.photo_albums_root, album_dirname, resized_filename)
                 cur.execute(
                     f'INSERT OR IGNORE INTO photo VALUES(?, ?, ?)', 
                     (resized_filename, pos, album_id))
@@ -138,7 +130,7 @@ def upload_album(conn, album_dirname):
                 print(f'    Uploading {resized_filename}...')
                 client.upload_file(
                     filepath, 
-                    bucket_name, 
+                    config.photo_albums_bucket, 
                     f'{album_dirname}/{resized_filename}', 
                     ExtraArgs={'ACL': 'public-read'})
                 uploaded += 1
@@ -150,8 +142,7 @@ def upload_album(conn, album_dirname):
     print(f'    Skipped {skipped}')
     return {'uploaded': uploaded, 'skipped': skipped}
 
-def restore_albums():
-    config = Config()
+def restore_albums(config: AbstractConfig):
     db = PhotoAlbumDb(config)
     cloud = PhotoAlbumCloud(config)
     fs = PhotoAlbumFileSystem(config)
@@ -173,10 +164,10 @@ def restore_albums():
 if __name__ == '__main__':
     parser = make_parser()
     args = parser.parse_args()
+    config = Config() if not args.test else TestConfig()
     if args.upload:
         print(f"Uploading photo albums...")
-        conn = sqlite3.connect('photo-albums.db')
-        upload_all_albums(conn)
+        upload_all_albums(config)
     if args.restore:
         print("Restoring photo albums...")
-        restore_albums()
+        restore_albums(config)

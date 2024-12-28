@@ -1,15 +1,11 @@
 from abc import ABCMeta, abstractmethod
 
-class AbstractConfig(metaclass=ABCMeta):
-    @property
-    @abstractmethod
-    def api_secret_key(self):
-        pass
+# ensure there are no trailing slashes when changing path strings
 
-    @property
-    @abstractmethod
-    def api_access_key(self):
-        pass
+class AbstractConfig(metaclass=ABCMeta):
+    api_secret_key = 'yourverysecretkey'
+    api_access_key = 'youraccesskey'
+    templates_path = 'absolute/path/to/templates'
 
     @property
     @abstractmethod
@@ -32,17 +28,13 @@ class AbstractConfig(metaclass=ABCMeta):
         pass
 
 class Config(AbstractConfig):
-    api_secret_key = 'yourverysecretkey'
-    api_access_key = "youraccesskey"
     photo_albums_bucket = 'braedonmcdonaldphotoalbums'
-    photo_album_db_path = '/absolute/path/to/db'
+    photo_albums_db_path = '/absolute/path/to/db'
     photo_albums_root = '/absolute/path/to/photo/albums'
     generated_site_root = '/absolute/path/to/build'
 
 class TestConfig(AbstractConfig):
-    api_secret_key = 'yourverysecretkey'
-    api_access_key = "youraccesskey"
-    photo_albums_bucket = 'braedonmcdonaldphotoalbums'
-    photo_album_db_path = '/absolute/path/to/test/db'
+    photo_albums_bucket = 'braedonmcdonaldphotoalbumstest'
+    photo_albums_db_path = '/absolute/path/to/test/db'
     photo_albums_root = '/absolute/path/to/test/photo/albums'
     generated_site_root = '/absolute/path/to/test/build'
