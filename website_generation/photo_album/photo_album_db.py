@@ -19,7 +19,7 @@ class Album:
         self.rowid = rowid
         self.name = name
         self.dirname = dirname
-        self.start_date_dtr = start_date_str
+        self.start_date_str = start_date_str
         self.end_date_str = end_date_str
         self.start_date = self.parse_date(start_date_str)
 
@@ -83,7 +83,7 @@ class PhotoAlbumDb:
 
     def add_album(self, album: Album) -> int:
         self.conn.execute('INSERT OR IGNORE INTO album VALUES (?, ?, ?, ?)',
-            (album.name, album.start_date_dtr, album.end_date_str, album.dirname))
+            (album.name, album.start_date_str, album.end_date_str, album.dirname))
         self.conn.commit()
         album.rowid = self.conn.execute(
             'SELECT rowid FROM album WHERE dirname = ?',
@@ -97,7 +97,7 @@ class PhotoAlbumDb:
             pos = max([x['position'] for x in res]) + 1
         return pos
     
-    def add_photo(self, photo: Photo):
+    def add_photo(self, photo: Photo) -> None:
         self.conn.execute('INSERT OR IGNORE INTO photo VALUES(?, ?, ?)',
             (photo.filename, photo.position, photo.album_id))
         self.conn.commit()

@@ -16,7 +16,7 @@ class PhotoAlbumCloud:
         ).Bucket(config.photo_albums_bucket)
         self.uploaded = 0
 
-    def download(self, album: Album, photo: Photo):
+    def download(self, album: Album, photo: Photo) -> None:
         object_key = f'{album.dirname}/{photo.filename}'
         download_dir = os.path.join(self.config.photo_albums_root, album.dirname)
         filepath = os.path.join(download_dir, photo.filename)
@@ -25,7 +25,7 @@ class PhotoAlbumCloud:
             os.makedirs(download_dir)
         self.bucket.download_file(object_key, filepath)
         
-    def upload(self, album: Album, photo: Photo):
+    def upload(self, album: Album, photo: Photo) -> None:
         object_key = f'{album.dirname}/{photo.filename}'
         filepath = f'{self.config.photo_albums_root}/{album.dirname}/{photo.filename}'
         self.bucket.upload_file(

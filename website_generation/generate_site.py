@@ -6,6 +6,7 @@ import sqlite3
 
 from jinja2 import Environment, FileSystemLoader
 
+from photo_album.photo_album_db import Album, Photo, PhotoAlbumDb
 from config import Config, TestConfig, AbstractConfig
 
 def make_parser():
@@ -24,59 +25,33 @@ def copy_files(config: AbstractConfig):
 
 def generate_photo_albums(config: AbstractConfig):
     template_env = Environment(loader=FileSystemLoader(config.templates_path))
-    con = sqlite3.connect(config.photo_albums_db_path)
-    con.row_factory = sqlite3.Row
-    cur = con.cursor()
+    db = PhotoAlbumDb(config)
 
-    db_albums = cur.execute('SELECT rowid, name, start_date_str, end_date_str, dirname FROM album').fetchall()
-    albums = []
-    for dba in db_albums: 
-        album = {}
-        album['name'] = dba['name']
-        album['dirname'] = dba['dirname']
-
-        try:
-            album['start_date'] = datetime.strptime(dba['start_date_str'], '%b %Y')
-            album['start_date_str'] = dba['start_date_str']
-        except ValueError:
-            album['start_date'] = datetime.strptime(dba['start_date_str'], '%Y')
-            album['start_date_str'] = dba['start_date_str']
-        if dba['end_date_str']:
-            try:
-                album['end_date'] = datetime.strptime(dba['end_date_str'], '%b %Y')
-                album['end_date_str'] = dba['end_date_str']
-            except ValueError:
-                album['end_date'] = datetime.strptime(dba['end_date_str'], '%Y')
-                album['end_date_str'] = dba['end_date_str']
-        else:
-            album['end_date'] = ''
-        albums.append(album)
-    albums.sort(key=lambda x: x['start_date'], reverse=True)
+    albums = db.get_albums()
+    albums.sort(reverse=True)
 
     template = template_env.get_template('photo_album_list.html')
     with open(f'{config.generated_site_root}/photo_album_list.html', mode='w') as f:
-        f.write(template.render({'albums': albums}))
+        f.write(template.render(albums=[vars(album) for album in albums]))
 
     os.mkdir(f'{config.generated_site_root}/photo-albums')
     template = template_env.get_template('photo_album.html')
 
-    for dba in db_albums:
-        res = cur.execute(
-            'SELECT filename, position FROM photo WHERE album_id = ? AND filename LIKE "%%_resized%%"', 
-            (dba['rowid'],)).fetchall()
-        res.sort(key=lambda x: x['position'])
-        filenames = [x['filename'] for x in res]
+    for album in albums:
+        photos = db.get_resized_album_photos(album.rowid)
+        photos.sort(key=lambda x: x.position)
+        filenames = [p.filename for p in photos]
 
-        with open(f'{config.generated_site_root}/photo-albums/{dba['dirname']}.html', mode='w') as f:
+        with open(f'{config.generated_site_root}/photo-albums/{album.dirname}.html', mode='w') as f:
             f.write(template.render(
                 bucket=config.photo_albums_bucket,
-                dirname=dba['dirname'],
-                album_name=dba['name'], 
-                start_date_str=dba['start_date_str'],
-                end_date_str=dba['end_date_str'],
+                dirname=album.dirname,
+                album_name=album.name, 
+                start_date_str=album.start_date_str,
+                end_date_str=album.end_date_str,
                 filenames=filenames))
 
-    con.close()
+    db.close()
 
 if __name__ =="__main__":
     parser = make_parser()

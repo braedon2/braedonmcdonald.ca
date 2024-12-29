@@ -35,7 +35,7 @@ class PhotoAlbumFileSystem:
         self.filenames_to_upload = []
         self.filename_pairs_to_upload = [] # tuples of uncompressed files with compressed counterpart
 
-    def set_album(self, album: Album, db_photos: list[Photo]):
+    def set_album(self, album: Album, db_photos: list[Photo]) -> None:
         self.album = album
         album_path = f'{self.root_dir}/{album.dirname}'
         filenames = os.listdir(album_path)
@@ -43,7 +43,7 @@ class PhotoAlbumFileSystem:
         db_filenames = [p.filename for p in db_photos]
         self.filenames_to_upload = [f for f in filenames if f not in db_filenames]
 
-    def resize_files(self):
+    def resize_files(self) -> None:
         if not self.album:
             raise AlbumNotSet('Attempt to resize files before setting album on PhotoAlbumFileSystem instance')
         album_path = f'{self.root_dir}/{self.album.dirname}'
