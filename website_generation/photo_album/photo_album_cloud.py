@@ -6,13 +6,6 @@ from config import AbstractConfig
 class PhotoAlbumCloud:
     def __init__(self, config: AbstractConfig):
         self.config = config
-        self.client = boto3.Session().client(
-            's3',
-            region_name='tor1',
-            endpoint_url='https://tor1.digitaloceanspaces.com',
-            aws_secret_access_key=self.config.api_secret_key,
-            aws_access_key_id=self.config.api_access_key
-        )
         self.bucket = boto3.Session(
             region_name='tor1',
             aws_access_key_id=config.api_access_key,
@@ -21,6 +14,7 @@ class PhotoAlbumCloud:
             's3',
             endpoint_url='https://tor1.digitaloceanspaces.com'
         ).Bucket(config.photo_albums_bucket)
+        self.uploaded = 0
 
     def download(self, album: Album, photo: Photo):
         object_key = f'{album.dirname}/{photo.filename}'
@@ -29,6 +23,12 @@ class PhotoAlbumCloud:
         
         if not (os.path.exists(download_dir)):
             os.makedirs(download_dir)
-        self.client.download_file(
-            self.config.photo_albums_bucket, 
-            object_key, filepath)
+        self.bucket.download_file(object_key, filepath)
+        
+    def upload(self, album: Album, photo: Photo):
+        object_key = f'{album.dirname}/{photo.filename}'
+        filepath = f'{self.config.photo_albums_root}/{album.dirname}/{photo.filename}'
+        self.bucket.upload_file(
+            filepath, object_key, 
+            ExtraArgs={'ACL': 'public-read'})
+        self.uploaded += 1

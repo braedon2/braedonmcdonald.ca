@@ -1,9 +1,5 @@
 import argparse
 import os
-from sqlite3 import connect, Connection
-
-import boto3
-from PIL import Image, ImageOps
 
 from config import AbstractConfig, Config, TestConfig
 from photo_album.photo_album_db import Album, Photo, PhotoAlbumDb
@@ -29,117 +25,40 @@ def make_parser():
     )
     return parser
 
-def make_client(config: AbstractConfig):
-    session = boto3.session.Session()
-    return session.client(
-        's3',
-        region_name='tor1',
-        endpoint_url='https://tor1.digitaloceanspaces.com',
-        aws_access_key_id=config.api_access_key,
-        aws_secret_access_key=config.api_secret_key
-    )
-
-def resize_image(path: str, filename: str) -> str:
-    resized_filename = os.path.splitext(filename)[0] + "_resized.JPEG" 
-    max_width = 680
-
-    with Image.open(os.path.join(path, filename)) as image:
-        image = ImageOps.exif_transpose(image)
-        aspect_ratio = image.height / image.width
-        if image.width > max_width:
-            new_height = int(max_width * aspect_ratio)
-            image = image.resize((max_width, new_height))
-            image.format = 'JPEG'
-        image.save(
-            os.path.join(path, resized_filename), 
-            format='JPEG', 
-            quality='keep')
-
-    return resized_filename
 
 def upload_all_albums(config: AbstractConfig):
-    total_uploaded = 0
-    total_skipped = 0
-    conn = connect(config.photo_albums_db_path)
+    db = PhotoAlbumDb(config)
+    cloud = PhotoAlbumCloud(config)
 
     album_dirs = os.listdir(config.photo_albums_root)
     for album_dirname in album_dirs:
-        result = upload_album(conn, config, album_dirname)
-        total_uploaded += result['uploaded']
-        total_skipped += result['skipped']
+        upload_album(album_dirname, db, cloud, config)
 
-    conn.close()
-    print(f'Total uploaded: {total_uploaded}')
-    print(f'Total skipped: {total_skipped}')
+    db.close()
+    print(f'Total uploaded: {cloud.uploaded}')
 
-def upload_album(conn: Connection, config: AbstractConfig, album_dirname: str):
+
+def upload_album(
+        album_dirname: str, 
+        db: PhotoAlbumDb, 
+        cloud: PhotoAlbumCloud,
+        config: AbstractConfig):
     print(f'uploading {album_dirname}...')
-    client = make_client(config)
-    path = os.path.join(config.photo_albums_root, album_dirname)
-    
-    album_name, *date_strs = album_dirname.split('_')
-    album_name = album_name.replace('-', ' ')
-    filenames = os.listdir(path)
-    filenames.sort(key=lambda x: os.path.getctime(os.path.join(path, x)))
+    fs = PhotoAlbumFileSystem(config)
+    album = Album.from_dirname(album_dirname)
+    pos = db.add_album(album)
 
-    start_date_str = date_strs[0].replace('-', ' ')
-    end_date_str = date_strs[1].replace('-', ' ') if len(date_strs) == 2 else ''
+    fs.set_album(album, db.get_album_photos(album.rowid))
+    fs.resize_files()
 
-    cur = conn.cursor()
-    cur.execute(
-        f'INSERT OR IGNORE INTO album VALUES (?, ?, ?, ?)', 
-        (album_name, start_date_str, end_date_str, album_dirname))
-    conn.commit()
-    album_id = cur.execute(
-        f'SELECT rowid FROM album WHERE dirname = ?', 
-        (album_dirname,)).fetchone()[0]
-
-    pos = 0
-    uploaded = 0
-    skipped = 0
-
-    res = cur.execute(
-        f'SELECT position FROM photo WHERE album_id = ?', 
-        (album_id,)).fetchall()
-    if res:
-        pos = max([x[0] for x in res]) + 1
-
-    for filename in filenames:
-        cur = conn.cursor()
-        cur.execute(
-            f'INSERT OR IGNORE INTO photo VALUES(?, ?, ?)', 
-            (filename, pos, album_id))
-        conn.commit()
-        filepath = os.path.join(config.photo_albums_root, album_dirname, filename)
-        if cur.lastrowid:
+    for pair in fs.filename_pairs_to_upload:
+        for filename in pair:
             print(f'    Uploading {filename}...')
-            client.upload_file(
-                filepath, 
-                config.photo_albums_bucket, 
-                f'{album_dirname}/{filename}', 
-                ExtraArgs={'ACL': 'public-read'})
-            uploaded += 1
-            if "_resized" not in filename:
-                resized_filename = resize_image(path, filename)
-                filepath = os.path.join(config.photo_albums_root, album_dirname, resized_filename)
-                cur.execute(
-                    f'INSERT OR IGNORE INTO photo VALUES(?, ?, ?)', 
-                    (resized_filename, pos, album_id))
-                conn.commit()
-                print(f'    Uploading {resized_filename}...')
-                client.upload_file(
-                    filepath, 
-                    config.photo_albums_bucket, 
-                    f'{album_dirname}/{resized_filename}', 
-                    ExtraArgs={'ACL': 'public-read'})
-                uploaded += 1
-            pos += 1
-        else:
-            skipped += 1
-    
-    print(f'    Uploaded {uploaded}')
-    print(f'    Skipped {skipped}')
-    return {'uploaded': uploaded, 'skipped': skipped}
+            photo = Photo(filename, pos, album.rowid)
+            cloud.upload(album, photo)
+            db.add_photo(photo)
+        pos += 1
+
 
 def restore_albums(config: AbstractConfig):
     db = PhotoAlbumDb(config)
@@ -158,7 +77,10 @@ def restore_albums(config: AbstractConfig):
 
     print('Removing dangling albums')
     removed = fs.remove_dangling_albums(db.get_albums())
-    print(f'    Removed {' '.join(removed)}')
+    if removed:
+        print(f'    Removed {' '.join(removed)}')
+    else:
+        print('    Nothing to remove')
 
 if __name__ == '__main__':
     parser = make_parser()

@@ -54,7 +54,7 @@ class Album:
             row['rowid'])
     
 class Photo:
-    def __init__(self, filename: str, position: int, album_id: int, rowid: int|None):
+    def __init__(self, filename: str, position: int, album_id: int, rowid: int|None=None):
         self.rowid = rowid
         self.filename = filename
         self.position = position
@@ -80,6 +80,27 @@ class PhotoAlbumDb:
 
     def close(self):
         self.conn.close()
+
+    def add_album(self, album: Album) -> int:
+        self.conn.execute('INSERT OR IGNORE INTO album VALUES (?, ?, ?, ?)',
+            (album.name, album.start_date_dtr, album.end_date_str, album.dirname))
+        self.conn.commit()
+        album.rowid = self.conn.execute(
+            'SELECT rowid FROM album WHERE dirname = ?',
+            (album.dirname,)).fetchone()[0]
+        
+        pos = 0
+        res = self.conn.execute(
+        f'SELECT position FROM photo WHERE album_id = ?', 
+        (album.rowid,)).fetchall()
+        if res:
+            pos = max([x['position'] for x in res]) + 1
+        return pos
+    
+    def add_photo(self, photo: Photo):
+        self.conn.execute('INSERT OR IGNORE INTO photo VALUES(?, ?, ?)',
+            (photo.filename, photo.position, photo.album_id))
+        self.conn.commit()
 
     def get_albums(self) -> list[Album]:
         res = self.conn.execute('SELECT rowid, * FROM album')
