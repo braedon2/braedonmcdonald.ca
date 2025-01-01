@@ -164,4 +164,5 @@ class PhotoAlbumDb:
                 SET position = ?
                 WHERE filename = ?""",
                 (i, photo.filename.replace('_resized', '')))
+            self.conn.commit()
             

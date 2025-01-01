@@ -1,23 +1,30 @@
+import argparse
+import math
 import sys
-import sqlite3 
+from typing import Iterable
 
-import config
+from config import AbstractConfig, Config, TestConfig
 from photo_album.photo_album_db import (
     Album, Photo, PhotoAlbumDb
 )
 
-from PyQt6 import QtGui
+from PyQt6.QtGui import QPainter, QPixmap
 from PyQt6.QtCore import (
     QAbstractListModel, 
     QAbstractTableModel,
-    QItemSelection,
+    QBuffer,
+    QByteArray,
+    QIODevice,
     QItemSelectionModel, 
     QModelIndex,
+    QRect,
     QSize,
     Qt
 )
 from PyQt6.QtWidgets import (
-    QApplication, 
+    QAbstractItemView,
+    QApplication,
+    QFrame,
     QHBoxLayout,
     QListView, 
     QMainWindow, 
@@ -25,91 +32,213 @@ from PyQt6.QtWidgets import (
     QSizePolicy,
     QSpacerItem, 
     QStackedLayout,
+    QStyledItemDelegate,
     QTableView,
     QVBoxLayout,
     QWidget
 )
 
+def make_parser():
+    parser = argparse.ArgumentParser(
+        description='Graphical interface for editing photo albums',
+    )
+    parser.add_argument(
+        '-t', '--test', action='store_true',
+        help='Use the test database')
+    return parser
+
+def pixmap_to_bytearray(pixmap: QPixmap) -> QByteArray:
+    ba = QByteArray()
+    buff = QBuffer(ba)
+    buff.open(QIODevice.OpenModeFlag.WriteOnly)
+    pixmap.save(buff, 'JPG')
+    byte_array = ba.data()
+    return byte_array
+
 class PhotoAlbumsListModel(QAbstractListModel):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, config: AbstractConfig, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.db = PhotoAlbumDb(config.photo_album_db_path)
-        self._data: list[Album] = self.db.get_albums()
-        self._data.sort(reverse=True)
+        self.db = PhotoAlbumDb(config)
+        self.data = self.db.get_albums()
+        self.data.sort(reverse=True)
 
     def data(self, index: QModelIndex, role: Qt.ItemDataRole) -> str|QSize|None:
         if role == Qt.ItemDataRole.DisplayRole:
-            return self._data[index.row()].dirname
+            return self.data[index.row()].dirname
         if role == Qt.ItemDataRole.SizeHintRole:
             return QSize(175, 50)
         
     def rowCount(self, index: QModelIndex) -> int:
-        return len(self._data)
+        return len(self.data)
 
 class PhotoAlbumsListView(QListView):
     pass
 
-class PhotoAlbumTableModel(QAbstractTableModel):
-    def __init__(self, *args, album_id, **kwargs):
+class PhotoAlbumImagesTableModel(QAbstractTableModel):
+    def __init__(self, album: Album, config: AbstractConfig, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.album_id = album_id
+        self.album = album
+        self.db = PhotoAlbumDb(config)
+        self.data: list[tuple[Photo, QPixmap]] = []
+        self.unsaved_data = None
+
+        for p in self.db.get_resized_album_photos(album.rowid):
+            pixmap = QPixmap(
+                f'{config.photo_albums_root}/{album.dirname}/{p.filename}')
+            pixmap = pixmap.scaled(150, 150, Qt.AspectRatioMode.KeepAspectRatio)
+            self.data.append((p, pixmap))
+        self.data.sort(key=lambda x: x[0].position)
 
     def data(self, index: QModelIndex, role: Qt.ItemDataRole):
-        if role == Qt.ItemDataRole.DisplayRole:
-            return self.album_id
+        if role == Qt.ItemDataRole.DecorationRole:
+            i = index.row() * 3 + index.column()
+            if i < len(self.data):
+                if self.unsaved_data:
+                    return self.unsaved_data[i][1]
+                else:
+                    return self.data[i][1]
         
     def rowCount(self, index: QModelIndex) -> int:
-        return 1
+        return math.ceil(len(self.data) / 3.0)
     
-    def columnCount(self, index):
-        return 1
+    def columnCount(self, index: QModelIndex):
+        return 3
+    
+    def flags(self, index):
+        return (
+            Qt.ItemFlag.ItemIsSelectable |
+            Qt.ItemFlag.ItemIsEnabled |
+            Qt.ItemFlag.ItemIsDragEnabled |
+            Qt.ItemFlag.ItemIsDropEnabled
+        )
+    
+    def mimeData(self, indexes: Iterable[QModelIndex]):
+        mime_data = super().mimeData(indexes)
+        if indexes:
+            row, col = indexes[0].row(), indexes[0].column()
+            i = row * 3 + col
+            data = self.unsaved_data if self.unsaved_data else self.data
+            if i < len(data):
+                pixmap = self.data[i][1]
+                byte_array = pixmap_to_bytearray(pixmap)
+                mime_data.setData('application/x-pixmap', byte_array)
+                mime_data.setText(f'{row},{col}')
+                return mime_data
+                
+    def dropMimeData(self, mime_data, action, row, column, parent) -> bool:
+        if not mime_data.hasFormat("application/x-pixmap"):
+            return False
+        source_row, source_col = map(int, mime_data.text().split(","))
+        source_i = source_row * 3 + source_col
+        dest_i = parent.row() * 3 + parent.column()
 
-class PhotoAlbumTableView(QTableView):
-    pass
+        if source_i < len(self.data) and dest_i < len(self.data):
+            self.insert_source_before_dest(source_i, dest_i)
+            self.dataChanged.emit(
+                self.index(0, 0), 
+                self.index(self.rowCount(0)-1, self.columnCount(0)-1))
+            return True
+        return False
+    
+    def insert_source_before_dest(self, source_i, dest_i) -> None:
+        if not self.unsaved_data:
+            self.unsaved_data = self.data.copy()
+        item = self.unsaved_data.pop(source_i)
+        self.unsaved_data.insert(dest_i, item)
+
+    def cancel_unsaved_data(self):
+        self.unsaved_data = None 
+        self.dataChanged.emit(
+            self.index(0, 0), 
+            self.index(self.rowCount(0)-1, self.columnCount(0)-1))
+
+    def save_unsaved_data(self):
+        self.db.update_photos_with_new_order(
+            [item[0] for item in self.unsaved_data])
+        self.data = self.unsaved_data
+        self.unsaved_data = None
+
+class PhotoDelegate(QStyledItemDelegate):
+    def paint(self, painter, option, index):
+        pixmap = index.data(Qt.ItemDataRole.DecorationRole)
+        if isinstance(pixmap, QPixmap):
+            rect = option.rect
+            pixmap_size = pixmap.size()
+            x = rect.x() + (rect.width() - pixmap_size.width()) // 2
+            y = rect.y() + (rect.height() - pixmap_size.height()) // 2
+            target_rect = QRect(x, y, pixmap_size.width(), pixmap_size.height())
+            painter.drawPixmap(target_rect, pixmap)
+        else:
+            super().paint(painter, option, index)
+
+class PhotoAlbumImagesTableView(QTableView):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.setDragEnabled(True)
+        self.setAcceptDrops(True)
+        self.setDropIndicatorShown(True)
+        self.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
+        self.setVerticalScrollMode(QAbstractItemView.ScrollMode.ScrollPerPixel)
+        self.verticalScrollBar().setSingleStep(10)
+
+        self.setShowGrid(False)
+        self.horizontalHeader().hide()
+        self.verticalHeader().hide()
+        
 
 class MainWindow(QMainWindow):
-    def __init__(self):
+    def __init__(self, config: AbstractConfig):
         super().__init__()
+        self.models: list[PhotoAlbumImagesTableModel] = []
 
         self.setWindowTitle("Photo Album Editor")
-        self.setMinimumWidth(600)
-        self.setMinimumHeight(300)
+        self.setFixedSize(780, 600)
 
         page_layout = QHBoxLayout()
-        main_vertical_layout = QVBoxLayout()
+        self.main_vertical_layout = QVBoxLayout()
         self.stacked_layout = QStackedLayout()
-        save_cancel_button_layout = QHBoxLayout()
+        self.save_cancel_button_layout = QHBoxLayout()
 
+        # left pane selection list
         self.photoAlbumsListView = PhotoAlbumsListView()
-        self.photoAlbumsListModel = PhotoAlbumsListModel()
+        self.photoAlbumsListModel = PhotoAlbumsListModel(config)
         self.photoAlbumsListView.setModel(self.photoAlbumsListModel)
         self.photoAlbumsListView.setSizePolicy(
-            QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Expanding
-        )
+            QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Expanding)
         page_layout.addWidget(self.photoAlbumsListView)
         ix = self.photoAlbumsListModel.index(0, 0)
         self.photoAlbumsListView.selectionModel().setCurrentIndex(ix, QItemSelectionModel.SelectionFlag.Select)
         self.photoAlbumsListView.selectionModel().currentChanged.connect(self.currentAlbumChanged)
 
-        for album in self.photoAlbumsListModel._data:
-            model = PhotoAlbumTableModel(album_id=album.rowid)
-            view = PhotoAlbumTableView()
+        # stacked layout of photo album images
+        for album in self.photoAlbumsListModel.data:
+            model = PhotoAlbumImagesTableModel(album, config)
+            view = PhotoAlbumImagesTableView()
             view.setModel(model)
-            view.setSizePolicy(
-                QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
-            )
+            view.resizeRowsToContents()
+            view.resizeColumnsToContents()
+            delegate = PhotoDelegate(view)
+            view.setItemDelegate(delegate)
+            model.dataChanged.connect(view.resizeRowsToContents)
+            model.dataChanged.connect(self.modelDataChanged)
+            self.models.append(model)
             self.stacked_layout.addWidget(view)
-        page_layout.addLayout(self.stacked_layout)
+        self.main_vertical_layout.addLayout(self.stacked_layout)
 
-        spacer = QSpacerItem(0, 50, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Maximum)
         self.cancelButton = QPushButton('cancel')
         self.cancelButton.setDisabled(True)
+        self.cancelButton.clicked.connect(self.cancelButtonClicked)
         self.saveButton = QPushButton('save')
         self.saveButton.setDisabled(True)
-        save_cancel_button_layout.addItem(spacer)
-        save_cancel_button_layout.addWidget(self.cancelButton)
-        save_cancel_button_layout.addWidget(self.saveButton)
-        main_vertical_layout.addLayout(save_cancel_button_layout)
+        self.saveButton.clicked.connect(self.saveButtonClicked)
+
+        spacer = QSpacerItem(0, 50, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Maximum)
+        self.save_cancel_button_layout.addItem(spacer)
+        self.save_cancel_button_layout.addWidget(self.cancelButton)
+        self.save_cancel_button_layout.addWidget(self.saveButton)
+        self.main_vertical_layout.addLayout(self.save_cancel_button_layout)
+
+        page_layout.addLayout(self.main_vertical_layout)
 
         widget = QWidget()
         widget.setLayout(page_layout)
@@ -117,9 +246,37 @@ class MainWindow(QMainWindow):
 
     def currentAlbumChanged(self, current, previous):
         self.stacked_layout.setCurrentIndex(current.row())
+        if self.models[current.row()].unsaved_data:
+            self.saveButton.setEnabled(True)
+            self.cancelButton.setEnabled(True)
+        else:
+            self.saveButton.setEnabled(False)
+            self.cancelButton.setEnabled(False)
+
+    def modelDataChanged(self):
+        self.saveButton.setEnabled(True)
+        self.cancelButton.setEnabled(True)
+
+    def cancelButtonClicked(self):
+        index = self.stacked_layout.currentIndex()
+        model = self.models[index]
+        model.cancel_unsaved_data()
+        self.saveButton.setEnabled(False)
+        self.cancelButton.setEnabled(False)
+
+    def saveButtonClicked(self):
+        index = self.stacked_layout.currentIndex()
+        model = self.models[index]
+        model.save_unsaved_data()
+        self.saveButton.setEnabled(False)
+        self.cancelButton.setEnabled(False)
 
 if __name__ == '__main__':
+    parser = make_parser()
+    args = parser.parse_args()
+    config = TestConfig if args.test else Config
+
     app = QApplication(sys.argv)
-    window = MainWindow()
+    window = MainWindow(config)
     window.show()
     app.exec()

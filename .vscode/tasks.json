@@ -94,7 +94,7 @@
             "type": "shell",
             "command": "${command:python.interpreterPath}",
             "args": [
-                "${workspaceFolder}/website_generation/edit_photo_albums.py"
+                "${workspaceFolder}/website_generation/photo_albums_gui.py"
             ],
             "group": {
                 "kind": "build"
@@ -138,6 +138,18 @@
                 "--test"
             ],
             "group": "test"
+        },
+        {
+            "label": "test edit photo albums",
+            "type": "shell",
+            "command": "${command:python.interpreterPath}",
+            "args": [
+                "${workspaceFolder}/website_generation/photo_albums_gui.py",
+                "--test"
+            ],
+            "group": {
+                "kind": "test"
+            }
         },
     ]
 }
