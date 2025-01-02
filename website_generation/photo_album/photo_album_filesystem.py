@@ -7,6 +7,7 @@ from photo_album.photo_album_db import Album, Photo
 class AlbumNotSet(Exception):
     pass
 
+
 def resize_image(path: str, filename: str) -> str:
     root, ext = os.path.splitext(filename)
     image_format = ext.replace('.', '')
@@ -17,16 +18,19 @@ def resize_image(path: str, filename: str) -> str:
 
     with Image.open(os.path.join(path, filename)) as image:
         image = ImageOps.exif_transpose(image)
+        image.format = image_format
         aspect_ratio = image.height / image.width
         if image.width > max_width:
             new_height = int(max_width * aspect_ratio)
             image = image.resize((max_width, new_height))
-            image.format = image_format
         image.save(
             os.path.join(path, resized_filename), 
             format=image_format, 
-            quality='keep')
+            quality=95,
+            subsampling=0)
+
     return resized_filename
+
 
 class PhotoAlbumFileSystem:
     def __init__(self, config: AbstractConfig):
