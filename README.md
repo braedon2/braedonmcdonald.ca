@@ -1,11 +1,32 @@
+# braedonmdonald.ca
+
+This repository contains the source code used to generate my personal website.
+It does not use an off the shelf static site generator. Instead it has custom
+Python scripts used for backing up photo albums to the cloud and then using
+those cloud links to generate webpages for each album. The rest of the pages
+are mostly hand coded html except for the header and navigation links which
+are inserted using a template library.
+
+Right now I'm using Web Hosting Canada for the domain name, and Digital Ocean
+for the virtual private server and object storage. 
+
 # Project setup
 
-* requires python 3.13
-* `pip install -r requirements.txt`
+These are the steps for setting up the project after a fresh git clone.
 
-# Running tests
-
-Run `pytest` from project root
+* requires Python 3.13
+* Install Live Server VS Code extension
+* run `pip install -r requirements.txt` in the root of the project
+* In the `website_generation` directory make a copy of `config.template.py` in
+  same directory and call it `config.py`
+  * Change the strings in `Config` and `TestConfig`. The `photo_albums_bucket` 
+    shouldn't need to be changed but the rest need to be changed to local paths
+* Bring up the VS Code build tasks with `ctrl+shift+B` and run `restore db`
+* Bring up build tasks again and run `restore photo albums`
+* Bring up build tasks again and run `restore guitar videos`
+* In settings.json, set `liveServer.settings.root` to be the same as what is 
+  set in `generated_site_root` in either `Config` or `TestConfig` (more on this
+  later)
 
 # Server setup
 
@@ -52,3 +73,61 @@ reload nginx
 sudo systemctl reload nginx
 ```
 
+# Running Unit Tests
+
+Run `pytest` from project root.
+
+# Using The Scripts
+
+The `website_generation` folder contains scripts for backing up photo albums,
+backing up guitar videos, and generating the website's html files. The scripts 
+are based around three things: The local filesystem, a local SQLite database,
+and a few cloud based object storage buckets. Photo albums backed up to the 
+cloud must be present in the local filesystem (in the directory set in the 
+config) for certain script operations to work. The database is used by 
+`generate_site.py` to construct photo cloud links and put them in the right 
+order.
+
+## manage_photo_albums.py
+
+This script is used to restore and upload photo albums to and from the root 
+directory set in `Config`. Albums are uploaded with 
+`manage_photo_albums.py --upload` and restored with 
+`manage_photo_albums.py --restore`.
+
+### Uploading an album
+
+When making a new photo album, the directory must 
+have to following format: the name of the album with dashes instead of spaces
+followed by an underscore with a start date of the form `%b-%Y` or `Y` and an
+optional following of an end date of the same form. 
+
+When `manage_photo_albums.py --upload` is run, the script loops through each 
+subfolder of `Config.photo_albums_root`. Photos in an album are resized as 
+copies before all the photos (resized and non resized) are uploaded to the 
+object storage bucket of `Config.photo_albums_bucket`. Photos that are already
+present in the local database will not be re-uploaded. Album information (if 
+it is new) and photo information will be added to the local database.
+
+### Restoring albums
+
+Restoring albums is less intelligent than uploading in that it won't try to 
+skip restoring photos that are already present in the database. Instead it 
+restores everything, overwriting files that are already present. Photos in any 
+of the albums that are not present in the local database are removed. Any 
+albums that are not present in the local database will also be removed.
+
+Before restoring albums it's important to always restore the local database 
+first.
+
+## manage_photo_albums_db.py 
+
+This script is used to restore and backup the local SQLite database set in 
+`Config.photo_albums_db_path` to and from the bucket set in 
+`AbstractConfig.db_backup_bucket`. The database is backed up with
+`manage_photo_albums_db.py --upload` where the file is uploaded with a 
+timestamp instead of its original filename for its key. The database is 
+restored with `manage_photo_albums_db.py --restore` where it uses the 
+timestamps to restore the most recently backed up file. 
+
+## photo_albums_gui.py 
