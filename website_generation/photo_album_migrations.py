@@ -1,4 +1,5 @@
 import sqlite3
+from config import Config
 
 def initialize_version_table(conn):
     conn.execute("""
@@ -52,7 +53,8 @@ def run_migrations(db_path):
     conn.close()
 
 if __name__ == '__main__':
-    conn = sqlite3.connect("photo-albums.db")
+    config = Config()
+    conn = sqlite3.connect(config.photo_albums_db_path)
     initialize_version_table(conn)
     apply_migrations(conn, migrations)
     conn.close()

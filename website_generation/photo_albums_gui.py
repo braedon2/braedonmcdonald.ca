@@ -8,7 +8,7 @@ from photo_album.photo_album_db import (
     Album, Photo, PhotoAlbumDb
 )
 
-from PyQt6.QtGui import QPainter, QPixmap
+from PyQt6.QtGui import QPixmap
 from PyQt6.QtCore import (
     QAbstractListModel, 
     QAbstractTableModel,
@@ -24,7 +24,6 @@ from PyQt6.QtCore import (
 from PyQt6.QtWidgets import (
     QAbstractItemView,
     QApplication,
-    QFrame,
     QHBoxLayout,
     QListView, 
     QMainWindow, 
@@ -47,7 +46,7 @@ def make_parser():
         help='Use the test database')
     return parser
 
-def pixmap_to_bytearray(pixmap: QPixmap) -> QByteArray:
+def pixmap_to_byte_array(pixmap: QPixmap) -> QByteArray:
     ba = QByteArray()
     buff = QBuffer(ba)
     buff.open(QIODevice.OpenModeFlag.WriteOnly)
@@ -75,6 +74,8 @@ class PhotoAlbumsListView(QListView):
     pass
 
 class PhotoAlbumImagesTableModel(QAbstractTableModel):
+    COL_COUNT = 4
+
     def __init__(self, album: Album, config: AbstractConfig, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.album = album
@@ -91,7 +92,7 @@ class PhotoAlbumImagesTableModel(QAbstractTableModel):
 
     def data(self, index: QModelIndex, role: Qt.ItemDataRole):
         if role == Qt.ItemDataRole.DecorationRole:
-            i = index.row() * 3 + index.column()
+            i = index.row() * self.COL_COUNT + index.column()
             if i < len(self.data):
                 if self.unsaved_data:
                     return self.unsaved_data[i][1]
@@ -99,10 +100,10 @@ class PhotoAlbumImagesTableModel(QAbstractTableModel):
                     return self.data[i][1]
         
     def rowCount(self, index: QModelIndex) -> int:
-        return math.ceil(len(self.data) / 3.0)
+        return math.ceil(len(self.data) / self.COL_COUNT)
     
     def columnCount(self, index: QModelIndex):
-        return 3
+        return self.COL_COUNT
     
     def flags(self, index):
         return (
@@ -116,11 +117,11 @@ class PhotoAlbumImagesTableModel(QAbstractTableModel):
         mime_data = super().mimeData(indexes)
         if indexes:
             row, col = indexes[0].row(), indexes[0].column()
-            i = row * 3 + col
+            i = row * self.COL_COUNT + col
             data = self.unsaved_data if self.unsaved_data else self.data
             if i < len(data):
                 pixmap = self.data[i][1]
-                byte_array = pixmap_to_bytearray(pixmap)
+                byte_array = pixmap_to_byte_array(pixmap)
                 mime_data.setData('application/x-pixmap', byte_array)
                 mime_data.setText(f'{row},{col}')
                 return mime_data
@@ -129,8 +130,8 @@ class PhotoAlbumImagesTableModel(QAbstractTableModel):
         if not mime_data.hasFormat("application/x-pixmap"):
             return False
         source_row, source_col = map(int, mime_data.text().split(","))
-        source_i = source_row * 3 + source_col
-        dest_i = parent.row() * 3 + parent.column()
+        source_i = source_row * self.COL_COUNT + source_col
+        dest_i = parent.row() * self.COL_COUNT + parent.column()
 
         if source_i < len(self.data) and dest_i < len(self.data):
             self.insert_source_before_dest(source_i, dest_i)
@@ -192,7 +193,7 @@ class MainWindow(QMainWindow):
         self.models: list[PhotoAlbumImagesTableModel] = []
 
         self.setWindowTitle("Photo Album Editor")
-        self.setFixedSize(780, 600)
+        self.setFixedSize(940, 600)
 
         page_layout = QHBoxLayout()
         self.main_vertical_layout = QVBoxLayout()
