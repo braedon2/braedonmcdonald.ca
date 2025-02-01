@@ -109,6 +109,8 @@ object storage bucket of `Config.photo_albums_bucket`. Photos that are already
 present in the local database will not be re-uploaded. Album information (if 
 it is new) and photo information will be added to the local database.
 
+Don't forget to backup the database using the `manage_photo_albums_db.py`
+
 ### Restoring albums
 
 Restoring albums is less intelligent than uploading in that it won't try to 
@@ -130,4 +132,24 @@ timestamp instead of its original filename for its key. The database is
 restored with `manage_photo_albums_db.py --restore` where it uses the 
 timestamps to restore the most recently backed up file. 
 
+## generate_site.py
+
+This script the Jinja templates to generate the website. It uses the local 
+database to populate the `photo_albums_list.html` page with links and generates
+a page for each photo album. The photo albums are simple top down lists of the 
+images.
+
 ## photo_albums_gui.py 
+
+Running this will open a graphical window. On the left is a list of photo album
+titles. Selecting from the list will show the albums photos. From there the 
+photos can be rearranged and the save button will become active. Clicking the
+save button will save the new order in the local database so that the next 
+call the `generate_site.py` will reflect the new order.
+
+## publish.sh
+
+This script simply copies the generated html files to the server.
+
+# Manual testing
+
