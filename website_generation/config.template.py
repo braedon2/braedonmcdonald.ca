@@ -28,6 +28,8 @@ class AbstractConfig(metaclass=ABCMeta):
     def generated_site_root(self):
         pass
 
+# always instantiate instead of using Config directly so you don't miss "not implemented" errors
+
 class Config(AbstractConfig):
     photo_albums_bucket = 'braedonmcdonaldphotoalbums'
     photo_albums_db_path = '/absolute/path/to/db'
@@ -35,7 +37,11 @@ class Config(AbstractConfig):
     generated_site_root = '/absolute/path/to/build'
 
 class TestConfig(AbstractConfig):
+    # abstract class implementations
     photo_albums_bucket = 'braedonmcdonaldphotoalbumstest'
     photo_albums_db_path = '/absolute/path/to/test/db'
     photo_albums_root = '/absolute/path/to/test/photo/albums'
     generated_site_root = '/absolute/path/to/test/build'
+
+    # unique to TestConfig
+    test_data_source = '/absolute/path/to/test/data'

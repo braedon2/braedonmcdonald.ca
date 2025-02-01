@@ -8,7 +8,7 @@ config = TestConfig()
 
 print("Copying files")
 shutil.rmtree(config.photo_albums_root, ignore_errors=True)
-shutil.copytree('test-data-source', config.photo_albums_root)
+shutil.copytree(config.test_data_source, config.photo_albums_root)
 
 print("Reseting database")
 os.remove(config.photo_albums_db_path)
