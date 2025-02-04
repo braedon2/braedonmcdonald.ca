@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="main-container">
+        <h1 class="page-heading bottom-padding-1">Photo Albums</h1>
+        <ul class="post-list">
+            {% for album in albums %}
+            <li class="post-item">
+                <a href="/photo-albums/{{ album.dirname }}.html">{{ album.name }}</a>
+                <p class="meta-info">{{ album.start_date_str }}{% if album.end_date_str %} - {{ album.end_date_str }}{% endif %}</p>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+{% endblock content %}
