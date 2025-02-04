@@ -3,6 +3,7 @@ from abc import ABCMeta, abstractmethod
 # ensure there are no trailing slashes when changing path strings
 
 class AbstractConfig(metaclass=ABCMeta):
+    project_root = '/absolute/path/to/project/root'
     api_secret_key = 'yourverysecretkey'
     api_access_key = 'youraccesskey'
     templates_path = 'absolute/path/to/templates'

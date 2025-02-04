@@ -1,12 +1,10 @@
 import argparse
 import os
-from datetime import datetime
 import shutil
-import sqlite3
 
 from jinja2 import Environment, FileSystemLoader
 
-from photo_album.photo_album_db import Album, Photo, PhotoAlbumDb
+from photo_album.photo_album_db import PhotoAlbumDb
 from config import Config, TestConfig, AbstractConfig
 
 def make_parser():
@@ -19,9 +17,25 @@ def make_parser():
     return parser
 
 def copy_files(config: AbstractConfig):
-    shutil.copytree('html', config.generated_site_root, dirs_exist_ok=True)
+    shutil.copyfile(
+        f'{config.project_root}/style.css', 
+        f'{config.generated_site_root}/style.css')
     shutil.copytree('images', f'{config.generated_site_root}/images')
     shutil.copytree('resources', f'{config.generated_site_root}/resources')
+
+def generate_html(config: AbstractConfig):
+    template_env = Environment(loader=FileSystemLoader(config.templates_path))
+
+    for fname in ['index.html', 'guitar.html', 'blog.html']:
+        template = template_env.get_template(fname)
+        with open(f'{config.generated_site_root}/{fname}', mode='w') as f:
+            f.write(template.render())
+
+    os.mkdir(f'{config.generated_site_root}/posts')
+    for fname in os.listdir(f'{config.templates_path}/posts'):
+        template = template_env.get_template(f'posts/{fname}')
+        with open(f'{config.generated_site_root}/posts/{fname}', mode='w') as f:
+            f.write(template.render())
 
 def generate_photo_albums(config: AbstractConfig):
     template_env = Environment(loader=FileSystemLoader(config.templates_path))
@@ -61,4 +75,5 @@ if __name__ =="__main__":
     shutil.rmtree(config.generated_site_root, ignore_errors=True)
     os.makedirs(config.generated_site_root)
     copy_files(config)
+    generate_html(config) # everything except the photo albums
     generate_photo_albums(config)
