@@ -10,7 +10,7 @@ are inserted using a template library.
 Right now I'm using Web Hosting Canada for the domain name, and Digital Ocean
 for the virtual private server and object storage. 
 
-The rest of the readme are mostly notes for myself.
+The rest of the readme is mostly notes for myself.
 
 # Project setup
 
@@ -18,12 +18,12 @@ These are the steps for setting up the project after a fresh git clone.
 
 * requires Python 3.13
 * Install Live Server VS Code extension
+* Clone the project
 * run `pip install -r requirements.txt` in the root of the project
 * In the `website_generation` directory make a copy of `config.template.py` in
   same directory and call it `config.py`
-  * Change the strings in `Config` and `TestConfig`. The `photo_albums_bucket` 
-    and `db_backup_bucket` shouldn't need to be changed but the rest need to be 
-	changed to local paths
+  * Change the `project_root` string in `AbstractConfig` to the absolute path
+    of where the project was cloned
 * Bring up the VS Code build tasks with `ctrl+shift+B` and run `restore db`
 * Bring up build tasks again and run `restore photo albums`
 * Bring up build tasks again and run `restore guitar videos`
@@ -156,9 +156,10 @@ This script simply copies the generated html files to the server.
 
 ## Manual testing
 
-To start, run the `reset_test_env.py` script to set up an environment that 
-allows for manual testing. From there, some scripts support the `--test` flag
-for manual testing.
+First make a directory called `test-data-source` in the root of the project
+then run the `reset_test_env.py` script to set up an environment that allows
+for manual testing. From there, some scripts support the `--test` flag for 
+manual testing.
 
 Scripts that support the flag:
 * `manage_photo_albums.py`
