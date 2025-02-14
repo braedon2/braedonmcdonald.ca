@@ -27,6 +27,10 @@ def make_parser():
 
 
 def upload_all_albums(config: AbstractConfig):
+    s = input('Did you make sure to rotate images? (y/n): ')
+    if s != 'y':
+        return
+
     db = PhotoAlbumDb(config)
     cloud = PhotoAlbumCloud(config)
 
@@ -43,6 +47,7 @@ def upload_album(
         db: PhotoAlbumDb, 
         cloud: PhotoAlbumCloud,
         config: AbstractConfig):
+
     print(f'uploading {album_dirname}...')
     fs = PhotoAlbumFileSystem(config)
     album = Album.from_dirname(album_dirname)
