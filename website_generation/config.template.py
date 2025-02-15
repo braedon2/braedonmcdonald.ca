@@ -3,11 +3,13 @@ from os import path
 
 class AbstractConfig(metaclass=ABCMeta):
     project_root = '/absolute/path/to/project/root'
-
     api_secret_key = 'yourverysecretkey'
     api_access_key = 'youraccesskey'
-    templates_path = 'relative/path/to/templates'
     db_backup_bucket = 'braedonmcdonaldphotoalbumsdbbackup'
+
+    @property
+    def templates_path(self):
+        return path.join(self.project_root, 'html')
 
     @property
     @abstractmethod

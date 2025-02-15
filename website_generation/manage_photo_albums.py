@@ -47,7 +47,6 @@ def upload_album(
         db: PhotoAlbumDb, 
         cloud: PhotoAlbumCloud,
         config: AbstractConfig):
-
     print(f'uploading {album_dirname}...')
     fs = PhotoAlbumFileSystem(config)
     album = Album.from_dirname(album_dirname)
