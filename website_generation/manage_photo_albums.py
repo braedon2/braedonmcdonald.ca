@@ -40,6 +40,7 @@ def upload_all_albums(config: AbstractConfig):
 
     db.close()
     print(f'Total uploaded: {cloud.uploaded}')
+    print('\nDON\'T FORGET TO BACKUP THE DATABASE')
 
 
 def upload_album(
