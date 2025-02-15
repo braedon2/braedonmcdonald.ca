@@ -24,6 +24,7 @@ These are the steps for setting up the project after a fresh git clone.
   same directory and call it `config.py`
   * Change the `project_root` string in `AbstractConfig` to the absolute path
     of where the project was cloned
+  * Set the access key and secret key for the obect storage API
 * Bring up the VS Code build tasks with `ctrl+shift+B` and run `restore db`
 * Bring up build tasks again and run `restore photo albums`
 * Bring up build tasks again and run `restore guitar videos`
