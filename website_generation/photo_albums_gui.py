@@ -83,14 +83,20 @@ class PhotoAlbumImagesTableModel(QAbstractTableModel):
         self.data: list[tuple[Photo, QPixmap]] = []
         self.unsaved_data = None
 
-        for p in self.db.get_resized_album_photos(album.rowid):
+    def init_data(self):
+        db_photos = self.db.get_resized_album_photos(self.album.rowid)
+        rows = math.ceil(len(db_photos) / self.COL_COUNT)
+
+        self.beginInsertRows(QModelIndex(), 0, rows-1)
+        for p in db_photos:
             pixmap = QPixmap(
-                f'{config.photo_albums_root}/{album.dirname}/{p.filename}')
+                f'{config.photo_albums_root}/{self.album.dirname}/{p.filename}')
             pixmap = pixmap.scaled(150, 150, Qt.AspectRatioMode.KeepAspectRatio)
             self.data.append((p, pixmap))
         self.data.sort(key=lambda x: x[0].position)
+        self.endInsertRows()
 
-    def data(self, index: QModelIndex, role: Qt.ItemDataRole):
+    def data(self, index: QModelIndex, role: Qt.ItemDataRole) -> QPixmap:
         if role == Qt.ItemDataRole.DecorationRole:
             i = index.row() * self.COL_COUNT + index.column()
             if i < len(self.data):
@@ -221,6 +227,8 @@ class MainWindow(QMainWindow):
             delegate = PhotoDelegate(view)
             view.setItemDelegate(delegate)
             model.dataChanged.connect(view.resizeRowsToContents)
+            model.rowsInserted.connect(view.resizeColumnsToContents)
+            model.rowsInserted.connect(view.resizeRowsToContents)
             model.dataChanged.connect(self.modelDataChanged)
             self.models.append(model)
             self.stacked_layout.addWidget(view)
@@ -241,11 +249,17 @@ class MainWindow(QMainWindow):
 
         page_layout.addLayout(self.main_vertical_layout)
 
+        self.models[0].init_data()
+
         widget = QWidget()
         widget.setLayout(page_layout)
         self.setCentralWidget(widget)
 
     def currentAlbumChanged(self, current, previous):
+        model = self.models[current.row()]
+        if not model.data:
+            model.init_data()
+
         self.stacked_layout.setCurrentIndex(current.row())
         if self.models[current.row()].unsaved_data:
             self.saveButton.setEnabled(True)
