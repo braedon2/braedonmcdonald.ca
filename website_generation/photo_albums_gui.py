@@ -75,6 +75,7 @@ class PhotoAlbumsListView(QListView):
 
 class PhotoAlbumImagesTableModel(QAbstractTableModel):
     COL_COUNT = 4
+    CELL_SIZE = 200
 
     def __init__(self, album: Album, config: AbstractConfig, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -91,7 +92,7 @@ class PhotoAlbumImagesTableModel(QAbstractTableModel):
         for p in db_photos:
             pixmap = QPixmap(
                 f'{config.photo_albums_root}/{self.album.dirname}/{p.filename}')
-            pixmap = pixmap.scaled(150, 150, Qt.AspectRatioMode.KeepAspectRatio)
+            pixmap = pixmap.scaled(self.CELL_SIZE, self.CELL_SIZE, Qt.AspectRatioMode.KeepAspectRatio)
             self.data.append((p, pixmap))
         self.data.sort(key=lambda x: x[0].position)
         self.endInsertRows()
@@ -199,7 +200,7 @@ class MainWindow(QMainWindow):
         self.models: list[PhotoAlbumImagesTableModel] = []
 
         self.setWindowTitle("Photo Album Editor")
-        self.setFixedSize(940, 600)
+        self.setFixedSize(1150, 600)
 
         page_layout = QHBoxLayout()
         self.main_vertical_layout = QVBoxLayout()

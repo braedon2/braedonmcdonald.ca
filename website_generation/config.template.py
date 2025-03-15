@@ -1,12 +1,15 @@
 from abc import ABCMeta, abstractmethod
-
-# ensure there are no trailing slashes when changing path strings
+from os import path
 
 class AbstractConfig(metaclass=ABCMeta):
+    project_root = '/absolute/path/to/project/root'
     api_secret_key = 'yourverysecretkey'
     api_access_key = 'youraccesskey'
-    templates_path = 'absolute/path/to/templates'
     db_backup_bucket = 'braedonmcdonaldphotoalbumsdbbackup'
+
+    @property
+    def templates_path(self):
+        return path.join(self.project_root, 'html')
 
     @property
     @abstractmethod
@@ -28,14 +31,21 @@ class AbstractConfig(metaclass=ABCMeta):
     def generated_site_root(self):
         pass
 
+# always instantiate instead of using Config directly so you don't miss "not implemented" errors
+
 class Config(AbstractConfig):
+    #abstract class implementations
     photo_albums_bucket = 'braedonmcdonaldphotoalbums'
-    photo_albums_db_path = '/absolute/path/to/db'
-    photo_albums_root = '/absolute/path/to/photo/albums'
-    generated_site_root = '/absolute/path/to/build'
+    photo_albums_db_path = path.join(AbstractConfig.project_root, 'photo-albums.db')
+    photo_albums_root = path.join(AbstractConfig.project_root, 'photo-albums')
+    generated_site_root = path.join(AbstractConfig.project_root, 'generated')
 
 class TestConfig(AbstractConfig):
+    # abstract class implementations
     photo_albums_bucket = 'braedonmcdonaldphotoalbumstest'
-    photo_albums_db_path = '/absolute/path/to/test/db'
-    photo_albums_root = '/absolute/path/to/test/photo/albums'
-    generated_site_root = '/absolute/path/to/test/build'
+    photo_albums_db_path = path.join(AbstractConfig.project_root, 'photo-albums-test.db')
+    photo_albums_root = path.join(AbstractConfig.project_root, 'test-data')
+    generated_site_root = path.join(AbstractConfig.project_root, 'generated-test')
+
+    # unique to TestConfig
+    test_data_source = path.join(AbstractConfig.project_root, 'test-data-source')
