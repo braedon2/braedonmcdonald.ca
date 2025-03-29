@@ -2,16 +2,20 @@ import os
 import sqlite3
 from typing import Generator
 
+from website_generation.config import TestConfig
 from website_generation.photo_album.photo_album_db import PhotoAlbumDb
-from website_generation.photo_album_migrations import run_migrations
+from website_generation.migrations.photo_album_migrations import run_migrations
 import pytest
+
+config = TestConfig()
+config.photo_albums_db_path = 'unit-test.db'
 
 @pytest.fixture
 def empty_db_path() -> Generator[str, None, None]:
-    db_path = 'test-photo-albums.db'
+    db_path = config.photo_albums_db_path
     run_migrations(db_path)
     yield db_path
-    os.remove('test-photo-albums.db')
+    os.remove(config.photo_albums_db_path)
 
 @pytest.fixture
 def populated_db_path(empty_db_path) -> str:
@@ -58,7 +62,7 @@ def populated_db_path(empty_db_path) -> str:
 
 @pytest.fixture
 def populated_db_object(populated_db_path):
-    db = PhotoAlbumDb(populated_db_path)
+    db = PhotoAlbumDb(config)
     yield db 
     db.close()
 
@@ -97,3 +101,29 @@ def test_update_photos_with_new_order(populated_db_object):
     assert updated_nonresized_photos[0].filename == '678.jpg'
     assert updated_nonresized_photos[1].filename == '345.jpg'
     assert updated_nonresized_photos[2].filename == '123.jpg'
+
+def test_delete_photo(populated_db_object):
+    # arrange
+    photos = populated_db_object.get_resized_album_photos(2)
+    album = sorted(populated_db_object.get_albums())[0]
+    
+    # act
+    populated_db_object.delete_photo(album, photos[1])
+    updated_photos = populated_db_object.get_resized_album_photos(2)
+    updated_photos.sort()
+
+    assert len(updated_photos) == 2
+    assert updated_photos[0].filename == '123_resized.jpg'
+    assert updated_photos[0].position == 0
+    assert updated_photos[1].filename == '678_resized.jpg'
+    assert updated_photos[1].position == 2
+
+    updated_photos = populated_db_object.get_nonresized_album_photos(2)
+    updated_photos.sort()
+
+    assert len(updated_photos) == 2
+    assert updated_photos[0].filename == '123.jpg'
+    assert updated_photos[0].position == 0
+    assert updated_photos[1].filename == '678.jpg'
+    assert updated_photos[1].position == 2
+    

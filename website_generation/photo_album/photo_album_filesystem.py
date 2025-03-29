@@ -1,6 +1,7 @@
 import os
 import shutil
 from PIL import Image, ImageOps
+
 from config import AbstractConfig
 from photo_album.photo_album_db import Album, Photo
 
@@ -77,3 +78,12 @@ class PhotoAlbumFileSystem:
         for dir_name in to_remove:
             shutil.rmtree(os.path.join(self.root_dir, dir_name))
         return list(to_remove)
+    
+    def delete_photo(self, album: Album, photo: Photo):
+        """photo must have '_resized' suffix"""
+        os.remove(os.path.join(self.root_dir, album.dirname, photo.filename))
+        os.remove(
+            os.path.join(
+                self.root_dir, 
+                album.dirname, 
+                photo.filename.replace('_resized', '')))

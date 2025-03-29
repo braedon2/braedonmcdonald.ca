@@ -32,3 +32,10 @@ class PhotoAlbumCloud:
             filepath, object_key, 
             ExtraArgs={'ACL': 'public-read'})
         self.uploaded += 1
+
+    def delete(self, album: Album, photo: Photo) -> None:
+        """photo must have _resized suffix"""
+        resized_key = f'{album.dirname}/{photo.filename}'
+        original_key = f'{album.dirname}/{photo.filename.replace('_resized', '')}'
+        self.bucket.Object(resized_key).delete()
+        self.bucket.Object(original_key).delete()

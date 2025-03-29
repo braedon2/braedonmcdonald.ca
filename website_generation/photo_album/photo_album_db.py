@@ -1,8 +1,6 @@
 from __future__ import annotations
-
 from datetime import datetime
 import sqlite3
-
 from config import AbstractConfig
 
 class IncompatiblePhotoListException(Exception):
@@ -166,3 +164,12 @@ class PhotoAlbumDb:
                 (i, photo.filename.replace('_resized', '')))
             self.conn.commit()
             
+    def delete_photo(self, album: Album, photo: Photo) -> None:
+        """photo must have '_resized' suffix"""
+        self.conn.execute("""
+            DELETE FROM photo WHERE filename = ? AND album_id = ?""",
+            (photo.filename, album.rowid))
+        self.conn.execute("""
+            DELETE FROM photo WHERE filename = ? AND album_id = ?""",
+            (photo.filename.replace('_resized', ''), album.rowid))
+        self.conn.commit()

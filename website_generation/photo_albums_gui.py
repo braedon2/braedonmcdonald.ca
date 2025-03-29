@@ -4,11 +4,11 @@ import sys
 from typing import Iterable
 
 from config import AbstractConfig, Config, TestConfig
-from photo_album.photo_album_db import (
-    Album, Photo, PhotoAlbumDb
-)
+from photo_album.photo_album_db import Album, Photo, PhotoAlbumDb
+from photo_album.photo_album_filesystem import PhotoAlbumFileSystem
+from photo_album.photo_album_cloud import PhotoAlbumCloud
 
-from PyQt6.QtGui import QPixmap
+from PyQt6.QtGui import QPixmap, QAction
 from PyQt6.QtCore import (
     QAbstractListModel, 
     QAbstractTableModel,
@@ -17,6 +17,7 @@ from PyQt6.QtCore import (
     QIODevice,
     QItemSelectionModel, 
     QModelIndex,
+    QPoint,
     QRect,
     QSize,
     Qt
@@ -24,9 +25,14 @@ from PyQt6.QtCore import (
 from PyQt6.QtWidgets import (
     QAbstractItemView,
     QApplication,
+    QDialog,
+    QDialogButtonBox,
     QHBoxLayout,
+    QLabel,
     QListView, 
     QMainWindow, 
+    QMenu,
+    QMessageBox,
     QPushButton,
     QSizePolicy,
     QSpacerItem, 
@@ -46,6 +52,7 @@ def make_parser():
         help='Use the test database')
     return parser
 
+
 def pixmap_to_byte_array(pixmap: QPixmap) -> QByteArray:
     ba = QByteArray()
     buff = QBuffer(ba)
@@ -53,6 +60,7 @@ def pixmap_to_byte_array(pixmap: QPixmap) -> QByteArray:
     pixmap.save(buff, 'JPG')
     byte_array = ba.data()
     return byte_array
+
 
 class PhotoAlbumsListModel(QAbstractListModel):
     def __init__(self, config: AbstractConfig, *args, **kwargs):
@@ -70,8 +78,10 @@ class PhotoAlbumsListModel(QAbstractListModel):
     def rowCount(self, index: QModelIndex) -> int:
         return len(self.data)
 
+
 class PhotoAlbumsListView(QListView):
     pass
+
 
 class PhotoAlbumImagesTableModel(QAbstractTableModel):
     COL_COUNT = 4
@@ -81,8 +91,11 @@ class PhotoAlbumImagesTableModel(QAbstractTableModel):
         super().__init__(*args, **kwargs)
         self.album = album
         self.db = PhotoAlbumDb(config)
+        self.fs = PhotoAlbumFileSystem(config)
+        self.cloud = PhotoAlbumCloud(config)
+
         self.data: list[tuple[Photo, QPixmap]] = []
-        self.unsaved_data = None
+        self.unsaved_data: list[tuple[Photo, QPixmap]] = None
 
     def init_data(self):
         db_photos = self.db.get_resized_album_photos(self.album.rowid)
@@ -166,6 +179,33 @@ class PhotoAlbumImagesTableModel(QAbstractTableModel):
         self.data = self.unsaved_data
         self.unsaved_data = None
 
+    def delete_photo(self, index: QModelIndex):
+        data_index = index.row() * self.COL_COUNT + index.column()
+        to_delete = self.data[data_index][0]
+
+        try:
+            print('Deleting photo from cloud...')
+            self.cloud.delete(self.album, to_delete)
+        except Exception as e:
+            print(e)
+            print('Failed to delete photo from cloud, aborting...')
+            return
+        
+        print ('Deleting photo from database...')
+        self.db.delete_photo(self.album, to_delete)
+        print('Deleting photo from filesystem...')
+        self.fs.delete_photo(self.album, to_delete)
+
+        self.data.pop(data_index)
+        self.db.update_photos_with_new_order(
+            [item[0] for item in self.data]
+        )
+        self.dataChanged.emit(
+            self.index(0, 0), 
+            self.index(self.rowCount(0)-1, self.columnCount(0)-1))
+        print('Photo deleted succesfuly')
+
+
 class PhotoDelegate(QStyledItemDelegate):
     def paint(self, painter, option, index):
         pixmap = index.data(Qt.ItemDataRole.DecorationRole)
@@ -179,19 +219,79 @@ class PhotoDelegate(QStyledItemDelegate):
         else:
             super().paint(painter, option, index)
 
+
 class PhotoAlbumImagesTableView(QTableView):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        # drag and drop
         self.setDragEnabled(True)
         self.setAcceptDrops(True)
         self.setDropIndicatorShown(True)
+
+        # single selection mode
         self.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
+
+        # scroll settigns
         self.setVerticalScrollMode(QAbstractItemView.ScrollMode.ScrollPerPixel)
         self.verticalScrollBar().setSingleStep(10)
 
+        # context menu
+        self.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+        self.customContextMenuRequested.connect(self.show_context_menu)
+
+        # styling
         self.setShowGrid(False)
         self.horizontalHeader().hide()
         self.verticalHeader().hide()
+
+    def show_context_menu(self, position: QPoint):
+        index = self.indexAt(position) 
+        if not index.isValid():
+            return
+
+        menu = QMenu(self)
+        action_edit = QAction("Edit caption", self)
+        action_delete = QAction("Delete", self)
+
+        action_edit.triggered.connect(lambda: self.edit_caption(index))
+        action_delete.triggered.connect(lambda: self.delete_photo(index))
+
+        menu.addAction(action_edit)
+        menu.addAction(action_delete)
+        menu.exec(self.viewport().mapToGlobal(position))
+
+    def edit_caption(self, index):
+        QMessageBox.information(self, "Edit", f"Editing cell at ({index.row()}, {index.column()})")
+
+    def delete_photo(self, index):
+        if self.model().unsaved_data:
+            QMessageBox.warning(self, "Delete", "Must save changes to album before deleting")
+            return
+        if DeletePhotoDialog(index).exec():
+            self.model().delete_photo(index)
+        else:
+            print('nah!')
+
+
+class DeletePhotoDialog(QDialog):
+    def __init__(self, index: QModelIndex):
+        super().__init__()
+
+        self.setWindowTitle("Delete Photo")
+
+        QBtn = (
+            QDialogButtonBox.StandardButton.Yes | QDialogButtonBox.StandardButton.Cancel
+        )
+
+        self.buttonBox = QDialogButtonBox(QBtn)
+        self.buttonBox.accepted.connect(self.accept)
+        self.buttonBox.rejected.connect(self.reject)
+
+        layout = QVBoxLayout()
+        message = QLabel(f'Are you sure you want to delete this photo?')
+        layout.addWidget(message)
+        layout.addWidget(self.buttonBox)
+        self.setLayout(layout)
         
 
 class MainWindow(QMainWindow):
@@ -228,6 +328,7 @@ class MainWindow(QMainWindow):
             delegate = PhotoDelegate(view)
             view.setItemDelegate(delegate)
             model.dataChanged.connect(view.resizeRowsToContents)
+            model.dataChanged.connect(view.resizeColumnsToContents)
             model.rowsInserted.connect(view.resizeColumnsToContents)
             model.rowsInserted.connect(view.resizeRowsToContents)
             model.dataChanged.connect(self.modelDataChanged)
@@ -250,7 +351,8 @@ class MainWindow(QMainWindow):
 
         page_layout.addLayout(self.main_vertical_layout)
 
-        self.models[0].init_data()
+        if self.models:
+            self.models[0].init_data()
 
         widget = QWidget()
         widget.setLayout(page_layout)
@@ -270,8 +372,12 @@ class MainWindow(QMainWindow):
             self.cancelButton.setEnabled(False)
 
     def modelDataChanged(self):
-        self.saveButton.setEnabled(True)
-        self.cancelButton.setEnabled(True)
+        index = self.stacked_layout.currentIndex()
+        model = self.models[index]
+
+        if model.unsaved_data:
+            self.saveButton.setEnabled(True)
+            self.cancelButton.setEnabled(True)
 
     def cancelButtonClicked(self):
         index = self.stacked_layout.currentIndex()
