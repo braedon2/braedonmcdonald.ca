@@ -1,8 +1,8 @@
 import os
 import shutil
-from config import TestConfig
-from migrations.photo_album_migrations import run_migrations
-from photo_album.photo_album_cloud import PhotoAlbumCloud
+from website_generation.photo_album.config import TestConfig
+from website_generation.migrations.photo_album_migrations import run_migrations
+from website_generation.photo_album.photo_album_cloud import PhotoAlbumCloud
 
 config = TestConfig()
 

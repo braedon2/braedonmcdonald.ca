@@ -3,10 +3,10 @@ import math
 import sys
 from typing import Iterable
 
-from config import AbstractConfig, Config, TestConfig
-from photo_album.photo_album_db import Album, Photo, PhotoAlbumDb
-from photo_album.photo_album_filesystem import PhotoAlbumFileSystem
-from photo_album.photo_album_cloud import PhotoAlbumCloud
+from website_generation.photo_album.config import AbstractConfig, Config, TestConfig
+from website_generation.photo_album.photo_album_db import Album, Photo, PhotoAlbumDb
+from website_generation.photo_album.photo_album_filesystem import PhotoAlbumFileSystem
+from website_generation.photo_album.photo_album_cloud import PhotoAlbumCloud
 
 from PyQt6.QtGui import QPixmap, QAction
 from PyQt6.QtCore import (

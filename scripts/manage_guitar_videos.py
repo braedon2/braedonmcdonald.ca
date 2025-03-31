@@ -1,7 +1,7 @@
 import argparse
 import os
 import boto3
-from config import Config
+from website_generation.photo_album.config import Config
 
 bucket_name = 'braedonmcdonaldguitarvideos'
 video_dir = 'guitar-videos'

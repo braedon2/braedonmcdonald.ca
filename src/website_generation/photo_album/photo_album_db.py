@@ -1,7 +1,7 @@
 from __future__ import annotations
 from datetime import datetime
 import sqlite3
-from config import AbstractConfig
+from .config import AbstractConfig
 
 class IncompatiblePhotoListException(Exception):
     pass

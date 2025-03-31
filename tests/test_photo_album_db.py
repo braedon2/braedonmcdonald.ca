@@ -1,11 +1,11 @@
 import os
 import sqlite3
 from typing import Generator
+import pytest
 
-from website_generation.config import TestConfig
+from website_generation.photo_album.config import TestConfig
 from website_generation.photo_album.photo_album_db import PhotoAlbumDb
 from website_generation.migrations.photo_album_migrations import run_migrations
-import pytest
 
 config = TestConfig()
 config.photo_albums_db_path = 'unit-test.db'

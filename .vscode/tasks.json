@@ -11,7 +11,7 @@
             "type": "shell",
             "command": "${command:python.interpreterPath}",
             "args": [
-                "${workspaceFolder}/website_generation/manage_guitar_videos.py",
+                "${workspaceFolder}/scripts/manage_guitar_videos.py",
                 "--upload"
             ],
             "group": {
@@ -23,7 +23,7 @@
             "type": "shell",
             "command": "${command:python.interpreterPath}",
             "args": [
-                "${workspaceFolder}/website_generation/manage_guitar_videos.py",
+                "${workspaceFolder}/scripts/manage_guitar_videos.py",
                 "--restore"
             ],
             "group": {
@@ -35,7 +35,7 @@
             "type": "shell",
             "command": "${command:python.interpreterPath}",
             "args": [
-                "${workspaceFolder}/website_generation/manage_photo_albums.py",
+                "${workspaceFolder}/scripts/manage_photo_albums.py",
                 "--upload"
             ],
             "group": {
@@ -47,7 +47,7 @@
             "type": "shell",
             "command": "${command:python.interpreterPath}",
             "args": [
-                "${workspaceFolder}/website_generation/manage_photo_albums.py",
+                "${workspaceFolder}/scripts/manage_photo_albums.py",
                 "--restore"
             ],
             "group": {
@@ -59,7 +59,7 @@
             "type": "shell",
             "command": "${command:python.interpreterPath}",
             "args": [
-                "${workspaceFolder}/website_generation/manage_photo_albums_db.py",
+                "${workspaceFolder}/scripts/manage_photo_albums_db.py",
                 "--backup"
             ],
             "group": {
@@ -71,7 +71,7 @@
             "type": "shell",
             "command": "${command:python.interpreterPath}",
             "args": [
-                "${workspaceFolder}/website_generation/manage_photo_albums_db.py",
+                "${workspaceFolder}/scripts/manage_photo_albums_db.py",
                 "--restore"
             ],
             "group": {
@@ -83,7 +83,7 @@
             "type": "shell",
             "command": "${command:python.interpreterPath}",
             "args": [
-                "${workspaceFolder}/website_generation/generate_site.py"
+                "${workspaceFolder}/scripts/generate_site.py"
             ],
             "group": {
                 "kind": "build"
@@ -94,7 +94,7 @@
             "type": "shell",
             "command": "${command:python.interpreterPath}",
             "args": [
-                "${workspaceFolder}/website_generation/photo_albums_gui.py"
+                "${workspaceFolder}/scripts/photo_albums_gui.py"
             ],
             "group": {
                 "kind": "build"
@@ -105,7 +105,7 @@
             "type": "shell",
             "command": "${command:python.interpreterPath}",
             "args": [
-                "${workspaceFolder}/website_generation/manage_photo_albums.py",
+                "${workspaceFolder}/scripts/manage_photo_albums.py",
                 "--upload", "--test"
             ],
             "group": "test"
@@ -115,7 +115,7 @@
             "type": "shell",
             "command": "${command:python.interpreterPath}",
             "args": [
-                "${workspaceFolder}/website_generation/manage_photo_albums.py",
+                "${workspaceFolder}/scripts/manage_photo_albums.py",
                 "--restore", "--test"
             ],
             "group": "test"
@@ -125,7 +125,7 @@
             "type": "shell",
             "command": "${command:python.interpreterPath}",
             "args": [
-                "${workspaceFolder}/website_generation/reset_test_env.py"
+                "${workspaceFolder}/scripts/reset_test_env.py"
             ],
             "group": "test"
         },
@@ -134,7 +134,7 @@
             "type": "shell",
             "command": "${command:python.interpreterPath}",
             "args": [
-                "${workspaceFolder}/website_generation/generate_site.py",
+                "${workspaceFolder}/scripts/generate_site.py",
                 "--test"
             ],
             "group": "test"
@@ -144,7 +144,7 @@
             "type": "shell",
             "command": "${command:python.interpreterPath}",
             "args": [
-                "${workspaceFolder}/website_generation/photo_albums_gui.py",
+                "${workspaceFolder}/scripts/photo_albums_gui.py",
                 "--test"
             ],
             "group": {

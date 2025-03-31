@@ -1,7 +1,7 @@
 import os
 import boto3
-from photo_album.photo_album_db import Album, Photo
-from config import AbstractConfig
+from .photo_album_db import Album, Photo
+from .config import AbstractConfig
 
 class PhotoAlbumCloud:
     def __init__(self, config: AbstractConfig):

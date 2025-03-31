@@ -1,10 +1,10 @@
 import argparse
 import os
 
-from config import AbstractConfig, Config, TestConfig
-from photo_album.photo_album_db import Album, Photo, PhotoAlbumDb
-from photo_album.photo_album_cloud import PhotoAlbumCloud
-from photo_album.photo_album_filesystem import PhotoAlbumFileSystem
+from website_generation.photo_album.config import AbstractConfig, Config, TestConfig
+from website_generation.photo_album.photo_album_db import Album, Photo, PhotoAlbumDb
+from website_generation.photo_album.photo_album_cloud import PhotoAlbumCloud
+from website_generation.photo_album.photo_album_filesystem import PhotoAlbumFileSystem
 
 def make_parser():
     parser = argparse.ArgumentParser(

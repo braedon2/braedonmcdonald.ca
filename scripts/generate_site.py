@@ -4,8 +4,8 @@ import shutil
 
 from jinja2 import Environment, FileSystemLoader
 
-from photo_album.photo_album_db import PhotoAlbumDb
-from config import Config, TestConfig, AbstractConfig
+from website_generation.photo_album.photo_album_db import PhotoAlbumDb
+from website_generation.photo_album.config import Config, TestConfig, AbstractConfig
 
 def make_parser():
     parser = argparse.ArgumentParser(

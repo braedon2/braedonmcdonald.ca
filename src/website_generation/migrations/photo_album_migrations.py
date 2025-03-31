@@ -1,5 +1,5 @@
 import sqlite3
-from config import Config
+from website_generation.photo_album.config import Config
 
 def initialize_version_table(conn):
     conn.execute("""

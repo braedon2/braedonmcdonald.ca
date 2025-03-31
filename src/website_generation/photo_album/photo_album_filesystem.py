@@ -2,8 +2,8 @@ import os
 import shutil
 from PIL import Image, ImageOps
 
-from config import AbstractConfig
-from photo_album.photo_album_db import Album, Photo
+from .config import AbstractConfig
+from .photo_album_db import Album, Photo
 
 class AlbumNotSet(Exception):
     pass
