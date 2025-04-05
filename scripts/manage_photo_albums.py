@@ -34,7 +34,9 @@ def upload_all_albums(config: AbstractConfig):
     db = PhotoAlbumDb(config)
     cloud = PhotoAlbumCloud(config)
 
-    album_dirs = os.listdir(config.photo_albums_root)
+    album_dirs = [
+        a for a in os.listdir(config.photo_albums_root) if a != ".DS_Store"
+    ]
     for album_dirname in album_dirs:
         upload_album(album_dirname, db, cloud, config)
 
