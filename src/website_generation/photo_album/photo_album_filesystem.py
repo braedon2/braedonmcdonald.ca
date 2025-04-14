@@ -66,7 +66,7 @@ class PhotoAlbumFileSystem:
         local_photos = os.listdir(dir_path)
         to_remove = set(local_photos) - set([p.filename for p in db_photos])
         for fname in to_remove:
-            os.remove(os.path.join(self.root_dir, fname))
+            os.remove(os.path.join(self.root_dir, album.dirname, fname))
         if not os.listdir(dir_path):
             os.rmdir(dir_path)
         return len(to_remove)
