@@ -19,7 +19,8 @@ These are the steps for setting up the project after a fresh git clone.
 * requires Python 3.13
 * Install Live Server VS Code extension
 * run `python -m venv venv` to make a new virtual environment
-* run `pip install -r requirements.txt` in the root of the project
+* run `pyton -m pip install -r requirements.txt` in the root of the project
+* run `python -m pip install -e .` in the root of the project to install local website generation library such that the source can be edited
 * In the `website_generation` directory make a copy of `config.template.py` in
   same directory and call it `config.py`
   * Change the `project_root` string in `AbstractConfig` to the absolute path
