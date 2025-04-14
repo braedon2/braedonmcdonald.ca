@@ -12,7 +12,7 @@ class AlbumNotSet(Exception):
 def resize_image(path: str, filename: str) -> str:
     root, ext = os.path.splitext(filename)
     image_format = ext.replace('.', '')
-    if image_format == 'jpg':
+    if image_format in ['jpg', 'JPG']:
         image_format = 'JPEG'
     resized_filename = root + "_resized" + ext
     max_width = 680
