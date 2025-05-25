@@ -14,7 +14,7 @@ The rest of the readme is mostly notes for myself.
 
 # Project setup
 
-These are the steps for setting up the project after a fresh git clone.
+Read the entire section before starting! These are the steps for setting up the project on a new machine or after a fresh git clone.
 
 * requires Python 3.12
 * Install Live Server VS Code extension
@@ -30,6 +30,14 @@ These are the steps for setting up the project after a fresh git clone.
 * run `python scripts/manage_photo_albums.py --restore`
 * run `python scrips/manage_guitar_videos.py --restore`
 * Bring up build tasks again and run `restore guitar videos`
+
+VERY IMPORTANT: add an ssh config for braedonmcdonald.ca so that `publish.sh` doesn't try to connect the cloudflare proxy
+```
+Host braedonmcdonald.ca
+    HostName <find ip on Digital Ocean account>
+		User root
+		IdentityFile ~/.ssh/<identity file>
+```
 
 # Server setup
 
