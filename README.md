@@ -16,22 +16,20 @@ The rest of the readme is mostly notes for myself.
 
 These are the steps for setting up the project after a fresh git clone.
 
-* requires Python 3.13
+* requires Python 3.12
 * Install Live Server VS Code extension
-* run `python -m venv venv` to make a new virtual environment
+* run `python -m venv venv` to make a new virtual environment then run `source venv/bin/activate`
 * run `pyton -m pip install -r requirements.txt` in the root of the project
 * run `python -m pip install -e .` in the root of the project to install local website generation library such that the source can be edited
-* In the `website_generation` directory make a copy of `config.template.py` in
+* In the `src/website_generation` directory make a copy of `config.template.py` in
   same directory and call it `config.py`
   * Change the `project_root` string in `AbstractConfig` to the absolute path
     of where the project was cloned
-  * Set the access key and secret key for the obect storage API
-* Bring up the VS Code build tasks with `ctrl+shift+B` and run `restore db`
-* Bring up build tasks again and run `restore photo albums`
+  * Set the access key and secret key for the obect storage API. You'll have to make a new access key in the Spaces and Object Storage tab in Digital Ocean.
+* run `python scrips/manage_photo_albums_db.py --restore`
+* run `python scripts/manage_photo_albums.py --restore`
+* run `python scrips/manage_guitar_videos.py --restore`
 * Bring up build tasks again and run `restore guitar videos`
-* In settings.json, set `liveServer.settings.root` to be the same as what is 
-  set in `generated_site_root` in either `Config` or `TestConfig` (more on this
-  later)
 
 # Server setup
 
