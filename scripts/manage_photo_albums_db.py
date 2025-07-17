@@ -9,8 +9,8 @@ def make_parser():
     )
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument(
-        '-u', '--backup', action='store_true',
-        help='Upload photo albums database to cloud bucket, using current date and time as key name'
+        '-b', '--backup', action='store_true',
+        help='Backup photo albums database to cloud bucket, using current date and time as key name'
     )
     group.add_argument(
         '-r', '--restore', action='store_true',
