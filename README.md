@@ -12,6 +12,25 @@ for the virtual private server and object storage.
 
 The rest of the readme is mostly notes for myself.
 
+# Common workflows
+
+The most common workflow is creating a new album and adding photos to it
+
+* Under the photo-albums directory create a new directory for the photo album
+  * Example valid directory names
+    * Trip-to-place_Aug-2020
+    * Trip_2020
+* Add pictures to the new directory
+* Rotate photos as needed before running the scripts
+* From the root of the project run `source venv/bin/activate`
+* From the root of the project run `python scripts/manage_photo_albums.py --upload`
+* Run `python scripts/photo_albums_gui.py`, rearrange the photos, and click save
+* Run `sudo rm -rf generated`
+* Run `python scripts/generate_site.py`
+* cd into `generated` directory and run `python -m http.server` and verify the site generated properly
+* Run `python scripts/manage_photo_albums_db.py --backup`
+* Run `./publish`
+
 # Project setup
 
 Read the entire section before starting! These are the steps for setting up the project on a new machine or after a fresh git clone.
@@ -145,7 +164,7 @@ timestamps to restore the most recently backed up file.
 
 ## generate_site.py
 
-This script the Jinja templates to generate the website. It uses the local 
+This script uses the Jinja templates to generate the website. It uses the local 
 database to populate the `photo_albums_list.html` page with links and generates
 a page for each photo album. The photo albums are simple top down lists of the 
 images.
