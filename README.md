@@ -35,8 +35,7 @@ The most common workflow is creating a new album and adding photos to it
 
 Read the entire section before starting! These are the steps for setting up the project on a new machine or after a fresh git clone.
 
-* requires Python 3.12
-* Install Live Server VS Code extension
+* requires Python 3.12 or higher
 * run `python -m venv venv` to make a new virtual environment then run `source venv/bin/activate`
 * run `pyton -m pip install -r requirements.txt` in the root of the project
 * run `python -m pip install -e .` in the root of the project to install local website generation library such that the source can be edited
@@ -48,7 +47,6 @@ Read the entire section before starting! These are the steps for setting up the 
 * run `python scrips/manage_photo_albums_db.py --restore`
 * run `python scripts/manage_photo_albums.py --restore`
 * run `python scrips/manage_guitar_videos.py --restore`
-* Bring up build tasks again and run `restore guitar videos`
 
 VERY IMPORTANT: add an ssh config for braedonmcdonald.ca so that `publish.sh` doesn't try to connect the cloudflare proxy
 ```
