@@ -72,7 +72,6 @@ if __name__ =="__main__":
     args = parser.parse_args()
     config = Config() if not args.test else TestConfig()
 
-    shutil.rmtree(config.generated_site_root, ignore_errors=True)
     os.makedirs(config.generated_site_root)
     copy_files(config)
     generate_html(config) # everything except the photo albums
