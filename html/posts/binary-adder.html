@@ -1,10 +1,211 @@
 {% extends "base.html" %}
 
+{% block internal_stylesheet %}
+<style>
+    .physical-project-simulator-grid {
+        display:grid;
+        justify-items: center;
+        grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+        grid-template-rows: auto;
+        row-gap: 2px;
+        grid-template-areas: 
+            "a plus b equals c"
+            "led-a . led-b . led-c"
+            "decimal-a . decimal-b . decimal-c";
+        max-height: 100%;
+        border: 2px solid;
+        border-radius: 10px;
+        padding: 4px;
+    }
+    .item-a {
+        grid-area: a;
+    }
+    .item-plus {
+        grid-area: plus;
+    }
+    .item-b {
+        grid-area: b;
+    }
+    .item-equals {
+        grid-area: equals;
+    }
+    .item-c {
+        grid-area: c
+    }
+    .item-led-a {
+        grid-area: led-a;
+    }
+    .item-led-b {
+        grid-area: led-b
+    }
+    .item-led-c {
+        grid-area: led-c;
+    }
+    .item-decimal-a {
+        grid-area: decimal-a
+    }
+    .item-decimal-b {
+        grid-area: decimal-b
+    }
+    .item-decimal-c {
+        grid-area: decimal-c
+    }
+
+    .input-a-leds {
+        width: 100px;
+        display: grid;
+        grid-template-columns: 1em 1em 1em 1em;
+        justify-content: center;
+    }
+    .input-b-leds {
+        width: 100px;
+        display: grid;
+        grid-template-columns: 1em 1em 1em 1em;
+        justify-content: center;
+    }
+    .output-c-leds {
+        width: 125px;
+        display: grid;
+        grid-template-columns: 1em 1em 1em 1em 1em;
+        justify-content: center;
+    }
+
+    input[type="checkbox"] {
+        -webkit-appearance: none;
+        appearance: none;
+        background-color: #fff;
+        margin: 0;
+        display: grid;
+        place-content: center;
+    }
+
+    input[type="checkbox"]::before {
+        content: "";
+        width: 1em;
+        height: 1em;
+        border-radius: 50%;
+        transition: box-shadow 200ms ease;
+    }
+
+    .input-a-leds input[type="checkbox"]::before {
+        box-shadow: inset 1em 1em #330000;
+    }
+
+    .input-a-leds input[type="checkbox"]:checked::before {
+        box-shadow: inset 1em 1em #FF0000;
+    }
+
+    .input-b-leds input[type="checkbox"]::before {
+        box-shadow: inset 1em 1em #332B00;
+    }
+
+    .input-b-leds input[type="checkbox"]:checked::before {
+        box-shadow: inset 1em 1em #FFB000;
+    }
+
+    .output-c-leds input[type="checkbox"]::before {
+        box-shadow: inset 1em 1em #000033;
+    }
+
+    .output-c-leds input[type="checkbox"]:checked::before {
+        box-shadow: inset 1em 1em #0073E6;
+    }
+</style>
+{% endblock internal_stylesheet %}
+
+{% block internal_js %}
+<script>
+    class View {
+        constructor() {
+            this.outputLeds = document
+                .querySelector('.output-c-leds')
+                .querySelectorAll('input[type="checkbox"]')
+            this.decimalADisplay = document.querySelector('.item-decimal-a')
+            this.decimalBDisplay = document.querySelector('.item-decimal-b')
+            this.decimalCDisplay = document.querySelector('.item-decimal-c')
+        }
+        
+        updateView(aLeds, bLeds) {
+            const aDecimalValue = Array.from(aLeds).reduce((sum, checkbox, index) => {
+                return checkbox.checked ? sum + (2 ** (3 - index)) : sum
+            }, 0)
+
+            const bDecimalValue = Array.from(bLeds).reduce((sum, checkbox, index) => {
+                return checkbox.checked ? sum + (2 ** (3 - index)) : sum
+            }, 0)
+            
+            const aBinaryString = aDecimalValue.toString(2).padStart(4, '0')
+            const bBinaryString = bDecimalValue.toString(2).padStart(4, '0')
+
+            const cDecimalValue = aDecimalValue + bDecimalValue
+            const cBinaryString = cDecimalValue.toString(2).padStart(5, '0')
+
+            this.decimalADisplay.textContent = aDecimalValue
+            this.decimalBDisplay.textContent = bDecimalValue
+            this.decimalCDisplay.textContent = cDecimalValue
+
+            Array.from(this.outputLeds).map((led, index) => {
+                this.outputLeds[index].checked = cBinaryString[index] === "1"
+            })
+        }
+    }
+
+    const view = new View()
+
+    const aLedsForm = document.querySelector('.input-a-leds');
+    const aLeds = aLedsForm.querySelectorAll('input[type="checkbox"]')
+    const bLedsForm = document.querySelector('.input-b-leds');
+    const bLeds = bLedsForm.querySelectorAll('input[type="checkbox"]')
+
+    aLedsForm.addEventListener('change', _ => {
+        view.updateView(aLeds, bLeds)
+    })
+    bLedsForm.addEventListener('change', _ => {
+        view.updateView(aLeds, bLeds)
+    })
+</script>
+{% endblock internal_js %}
+
 {% block content %}
     <div class="main-container">
         <h1 class="page-heading bottom-padding-05">Making a binary adder toy with scrap wood</h1>
         <p class="meta-info bottom-padding-15">October 8, 2023</p>
         <div class="blog-content">
+            <div class="physical-project-simulator-grid">
+                <div class="item-a">a</div>  <!-- css grid items -->
+                <div class="item-plus">+</div>
+                <div class="item-b">b</div>
+                <div class="item-equals">=</div>
+                <div class="item-c">c</div>
+                <div class="item-led-a">
+                    <form class="input-a-leds">
+                        <input type="checkbox">
+                        <input type="checkbox">
+                        <input type="checkbox">
+                        <input type="checkbox">
+                    </form>
+                </div>
+                <div class="item-led-b">
+                    <form class="input-b-leds">
+                        <input type="checkbox">
+                        <input type="checkbox">
+                        <input type="checkbox">
+                        <input type="checkbox">
+                    </form>
+                </div>
+                <div class="item-led-c">
+                    <form class="output-c-leds">
+                        <input type="checkbox" disabled>
+                        <input type="checkbox" disabled>
+                        <input type="checkbox" disabled>
+                        <input type="checkbox" disabled>
+                        <input type="checkbox" disabled>
+                    </form>
+                </div>
+                <div class="item-decimal-a">0</div>
+                <div class="item-decimal-b">0</div>
+                <div class="item-decimal-c">0</div>
+            </div>
             <p>
                 My niece has a toy that I constantly find myself playing with when I visit. It's a simple wooden box with some switches and LEDs on the front. Electronics wise, the switches are just wired to toggle certain LEDs but it's very fun to fiddle with and I find the overall design with the wooden enclosure very satisfying. For a long time I thought it would be cool to make something with a similar wooden enclosure that does something a bit more involved. This fall, I finally got around to following through with this idea and made something in the same spirit as my nieces toy except the LEDs and switches are connected to a binary adder. 
             </p>
