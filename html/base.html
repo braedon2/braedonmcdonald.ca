@@ -8,6 +8,9 @@
     <link rel="stylesheet" href="/style.css" />
     <link rel="icon" href="/images/little-guy-32x32.png" type="image/x-icon">
     <link rel="shortcut icon" href="/images/little-guy-32x32.png" type="image/x-icon">
+    {% block internal_stylesheet %}
+    {% endblock internal_stylesheet %}
+
 </head>
 <body>
     <header class="bottom-padding-2">
@@ -25,5 +28,8 @@
     </header>
     {% block content %}
     {% endblock content %}
+    
+    {% block internal_js %}
+    {% endblock internal_js %}
 </body>
 </html>
