@@ -17,3 +17,4 @@ upload:
 
 backup:
     venv/bin/python scripts/manage_photo_albums_db.py --backup
+
