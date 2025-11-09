@@ -2,9 +2,29 @@
 
 {% block internal_stylesheet %}
 <style>
+        .physical-project-simulator-grid {
+        display:grid;
+        justify-items: center;
+        grid-template-columns: 2fr 1fr 2fr;
+        grid-template-rows: auto;
+        row-gap: 2px;
+        grid-template-areas: 
+            "a      led-a decimal-a"
+            "plus   .     .        "
+            "b      led-b decimal-b"
+            "equals .     .        "
+            "c      led-c decimal-c";
+        max-height: 100%;
+        border: 2px solid;
+        border-radius: 10px;
+        padding: 4px;
+    }
+
+    @media screen and (min-width: 480px) {
     .physical-project-simulator-grid {
         display:grid;
         justify-items: center;
+        align-items: center;
         grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
         grid-template-rows: auto;
         row-gap: 2px;
@@ -17,6 +37,8 @@
         border-radius: 10px;
         padding: 4px;
     }
+    }
+
     .item-a {
         grid-area: a;
     }
@@ -34,41 +56,44 @@
     }
     .item-led-a {
         grid-area: led-a;
+        justify-self: end;
     }
     .item-led-b {
-        grid-area: led-b
+        grid-area: led-b;
+        justify-self: end;
     }
     .item-led-c {
         grid-area: led-c;
+        justify-self: end;
     }
     .item-decimal-a {
-        grid-area: decimal-a
+        grid-area: decimal-a;
     }
     .item-decimal-b {
-        grid-area: decimal-b
+        grid-area: decimal-b;
     }
     .item-decimal-c {
-        grid-area: decimal-c
+        grid-area: decimal-c;
     }
 
     .input-a-leds {
-        width: 100px;
+        width: 4em;
         display: grid;
         grid-template-columns: 1em 1em 1em 1em;
         justify-content: center;
     }
     .input-b-leds {
-        width: 100px;
+        width: 4em;
         display: grid;
         grid-template-columns: 1em 1em 1em 1em;
         justify-content: center;
     }
     .output-c-leds {
-        width: 125px;
+        width: 5em;
         display: grid;
         grid-template-columns: 1em 1em 1em 1em 1em;
         justify-content: center;
-    }
+        align-self: center    }
 
     input[type="checkbox"] {
         -webkit-appearance: none;
@@ -172,36 +197,31 @@
         <p class="meta-info bottom-padding-15">October 8, 2023</p>
         <div class="blog-content">
             <div class="physical-project-simulator-grid">
-                <div class="item-a">a</div>  <!-- css grid items -->
+                <!-- css grid items -->
+                <div class="item-a">a</div>  
                 <div class="item-plus">+</div>
                 <div class="item-b">b</div>
                 <div class="item-equals">=</div>
                 <div class="item-c">c</div>
-                <div class="item-led-a">
-                    <form class="input-a-leds">
-                        <input type="checkbox">
-                        <input type="checkbox">
-                        <input type="checkbox">
-                        <input type="checkbox">
-                    </form>
-                </div>
-                <div class="item-led-b">
-                    <form class="input-b-leds">
-                        <input type="checkbox">
-                        <input type="checkbox">
-                        <input type="checkbox">
-                        <input type="checkbox">
-                    </form>
-                </div>
-                <div class="item-led-c">
-                    <form class="output-c-leds">
-                        <input type="checkbox" disabled>
-                        <input type="checkbox" disabled>
-                        <input type="checkbox" disabled>
-                        <input type="checkbox" disabled>
-                        <input type="checkbox" disabled>
-                    </form>
-                </div>
+                <form class="item-led-a input-a-leds">
+                    <input type="checkbox">
+                    <input type="checkbox">
+                    <input type="checkbox">
+                    <input type="checkbox">
+                </form>
+                <form class="item-led-b input-b-leds">
+                    <input type="checkbox">
+                    <input type="checkbox">
+                    <input type="checkbox">
+                    <input type="checkbox">
+                </form>
+                <form class="item-led-c output-c-leds">
+                    <input type="checkbox" disabled>
+                    <input type="checkbox" disabled>
+                    <input type="checkbox" disabled>
+                    <input type="checkbox" disabled>
+                    <input type="checkbox" disabled>
+                </form>
                 <div class="item-decimal-a">0</div>
                 <div class="item-decimal-b">0</div>
                 <div class="item-decimal-c">0</div>
