@@ -2,7 +2,7 @@
 
 {% block internal_stylesheet %}
 <style>
-        .physical-project-simulator-grid {
+    .physical-project-simulator-grid {
         display:grid;
         justify-items: center;
         grid-template-columns: 2fr 1fr 2fr;
@@ -66,6 +66,22 @@
         grid-area: led-c;
         justify-self: end;
     }
+
+    @media screen and (min-width: 480px) {
+    .item-led-a {
+        grid-area: led-a;
+        justify-self: center;
+    }
+    .item-led-b {
+        grid-area: led-b;
+        justify-self: center;
+    }
+    .item-led-c {
+        grid-area: led-c;
+        justify-self: center;
+    }
+    }
+
     .item-decimal-a {
         grid-area: decimal-a;
     }
