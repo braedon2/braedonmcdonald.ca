@@ -35,25 +35,31 @@ The most common workflow is creating a new album and adding photos to it
 
 Read the entire section before starting! These are the steps for setting up the project on a new machine or after a fresh git clone.
 
-* requires Python 3.12 or higher
-* run `python -m venv venv` to make a new virtual environment then run `source venv/bin/activate`
-* run `pyton -m pip install -r requirements.txt` in the root of the project
-* run `python -m pip install -e .` in the root of the project to install local website generation library such that the source can be edited
-* In the `src/website_generation` directory make a copy of `config.template.py` in
+* Requires Python 3.12 or higher
+* Run `python -m venv venv` to make a new virtual environment then run `source venv/bin/activate`
+* Run `pyton -m pip install -r requirements.txt` in the root of the project
+* Run `python -m pip install -e .` in the root of the project to install local website generation library such that the source can be edited
+* In the `src/website_generation/photo_album` directory make a copy of `config.template.py` in
   same directory and call it `config.py`
   * Change the `project_root` string in `AbstractConfig` to the absolute path
     of where the project was cloned
   * Set the access key and secret key for the obect storage API. You'll have to make a new access key in the Spaces and Object Storage tab in Digital Ocean.
-* run `python scrips/manage_photo_albums_db.py --restore`
-* run `python scripts/manage_photo_albums.py --restore`
-* run `python scrips/manage_guitar_videos.py --restore`
+* Run `python scripts/manage_photo_albums_db.py --restore`
+* Run `python scripts/manage_photo_albums.py --restore`
+* Run `python scripts/manage_guitar_videos.py --restore`
+* Add public ssh key to server's `.ssh/authorized_keys` 
+
+## Potential Problems
+
+* Pillow fails when trying to build from source
+  * Change Pillow's version to the latest version
 
 VERY IMPORTANT: add an ssh config for braedonmcdonald.ca so that `publish.sh` doesn't try to connect the cloudflare proxy
 ```
 Host braedonmcdonald.ca
     HostName <find ip on Digital Ocean account>
-		User root
-		IdentityFile ~/.ssh/<identity file>
+	User root
+	IdentityFile ~/.ssh/<identity file>
 ```
 
 # Server setup
