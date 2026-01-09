@@ -210,8 +210,59 @@
 {% block content %}
     <div class="main-container">
         <h1 class="page-heading bottom-padding-05">Making a binary adder toy with scrap wood</h1>
-        <p class="meta-info bottom-padding-15">October 8, 2023</p>
+        <p class="meta-info bottom-padding-15">October 8, 2023 (edited December 27 2025)</p>
         <div class="blog-content">
+            
+            <p>
+                My niece has a cute little toy with some switches and LEDs in a nice wooden enclosure. The toy is meant for young children so the interaction is limited. I thought it would be fun to make something similar but with a sprinkle of digital logic. A binary adder sounded like something I could accomplish using a bit of spare time over the summer.
+            </p>
+
+                <figure>
+                    <img src="/images/posts/binary-adder/finished.jpeg"
+                         alt="A wooden box with a row of thirteen coloured LEDs at the top and a row of eight switches at the bottom"
+                         loading="lazy" 
+                         class="blog-photo"
+                    />
+                    <figcaption>The finished project</figcaption>
+                </figure>
+
+            <p>
+                I made it with a hollowed out piece of scrap wood. It has a line of thirteen LEDs controlled by eight switches. From left to right the first four LEDs are red and represent the first number to be added, the next four LEDs are yellow and represent the second number to be added, and the last five LEDs are blue and represent the result.
+
+                If you're familiar with binary numbers the next couple of examples should showcase the working adder. If you're not familiar with binary numbers there's an interactive example coming up that might help build some intuition. 
+            </p>
+
+            <figure>
+                <img src="/images/posts/binary-adder/example1.jpeg"
+                     alt="The LEDs showing the addition of 1 + 1"
+                     loading="lazy"
+                     class="blog-photo"
+                />
+                <figcaption>1 + 1 = 2</figcaption>
+            </figure>
+
+            <figure>
+                <img src="/images/posts/binary-adder/example2.jpeg"
+                     alt="The LEDs showing the addition of 1 + 1"
+                     loading="lazy"
+                     class="blog-photo"
+                />
+                <figcaption>7 + 3 = 10</figcaption>
+            </figure>
+
+            <figure>
+                <img src="/images/posts/binary-adder/example3.jpeg"
+                        alt="The LEDs showing the addition of 1 + 1"
+                        loading="lazy"
+                        class="blog-photo"
+                />
+                <figcaption>1 + 15 = 16</figcaption>
+            </figure>
+
+            <p>
+                The box below emulates the behavior of the adder. Click on the red and yellow circles to see the result in the blue circles.
+            </p>
+
             <div class="physical-project-simulator-grid">
                 <!-- css grid items -->
                 <div class="item-a">a</div>  
@@ -242,20 +293,11 @@
                 <div class="item-decimal-b">0</div>
                 <div class="item-decimal-c">0</div>
             </div>
-            <p>
-                My niece has a toy that I constantly find myself playing with when I visit. It's a simple wooden box with some switches and LEDs on the front. Electronics wise, the switches are just wired to toggle certain LEDs but it's very fun to fiddle with and I find the overall design with the wooden enclosure very satisfying. For a long time I thought it would be cool to make something with a similar wooden enclosure that does something a bit more involved. This fall, I finally got around to following through with this idea and made something in the same spirit as my nieces toy except the LEDs and switches are connected to a binary adder. 
-            </p>
+
             <p>
                 I made it with a scrap piece of wood from my yard and a 74LS83 chip. The chip has all the logic for adding two binary numbers in a nice little breadboard friendly package. 
             </p>
-            <figure>
-                <img src="/images/posts/binary-adder/finished.jpeg"
-                     alt="A wooden box with a row of thirteen coloured LEDs at the top and a row of eight switches at the bottom"
-                     loading="lazy" 
-                     class="blog-photo"
-                />
-                <figcaption>The finished project</figcaption>
-            </figure>
+            
             <h2 class="page-subheading">How it works</h2>
             <p>
                 The top row of LEDs is divided into three numbers. Starting from the left, the first four LEDs are red and represent the first number to be added. The next four LEDs are yellow and represent the second number to be added. The next five LEDs are blue and represent the resulting sum. The bottom row of switches control the numbers to be added, so the first four switches from the left control the red LEDs, and the next four switches control the yellow LEDs.
