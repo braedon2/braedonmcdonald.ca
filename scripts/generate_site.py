@@ -26,7 +26,7 @@ def copy_files(config: AbstractConfig):
 def generate_html(config: AbstractConfig):
     template_env = Environment(loader=FileSystemLoader(config.templates_path))
 
-    for fname in ['index.html', 'guitar.html', 'blog.html']:
+    for fname in ['index.html', 'guitar.html', 'blog.html', '404.html']:
         template = template_env.get_template(fname)
         with open(f'{config.generated_site_root}/{fname}', mode='w') as f:
             f.write(template.render())

@@ -62,7 +62,9 @@ Host braedonmcdonald.ca
 	IdentityFile ~/.ssh/<identity file>
 ```
 
-# Server setup
+# Server setup (no longer used)
+
+The site is now hosted on firebase but keeping this just in case I move back to a managed server.
 
 install nginx and vim 
 ```
@@ -106,6 +108,12 @@ reload nginx
 ```
 sudo systemctl reload nginx
 ```
+
+# Firebase
+
+* Keep firebase up to date with `curl -sL https://firebase.tools | upgrade=true bash`
+* On a fresh clone of the project initialize the firebase project by running `firebase login` then `firebase init` in the root of the project
+* `firebase deploy` to deploy new changes
 
 # Running Unit Tests
 
