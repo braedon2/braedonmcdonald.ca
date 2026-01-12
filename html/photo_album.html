@@ -6,12 +6,10 @@
         <p class="meta-info bottom-padding-15">{{ start_date_str }}{% if end_date_str %} - {{ end_date_str }}{% endif %}</p>
         <div class="blog-content">
             {% for filename in filenames %}
-            <figure>
                 <img src="https://tor1.digitaloceanspaces.com/{{ bucket }}/{{ dirname }}/{{ filename }}"
                      loading="lazy" 
                      class="album-photo"
                 />
-            </figure>
             {% endfor %}
         </div>
     </div>
