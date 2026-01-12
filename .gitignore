@@ -11,4 +11,4 @@ config.py
 __pycache__
 test-data-source/
 test-data/
-.firebase
+.firebase/
