@@ -140,28 +140,30 @@ video {
     padding-bottom: 1em;
 }
 
-.blog-photo {
+.blog-content-figure {
     width: 100%;
-    display: block;
-    margin: auto;
-}
-
-@media screen and (min-width: 480px) {
-.blog-photo {
-    width: 80%;
-    display: block;
-    margin: auto;
-}
-}
-
-.blog-content figure {
     padding-bottom: 1em;
 }
 
-.blog-content figcaption {
-    line-height: 2;
+@media screen and (min-width: 480px) {
+.blog-content-figure {
+    width: 80%;
+    margin: 0 auto;
+    padding-bottom: 1em;
+}
+}
+
+.blog-content-figcaption {
+    margin-top: 0.25rem;
     text-align: left;
 }
+
+
+.blog-content-img {
+    width: 100%;
+    display: block;
+}
+
 
 /* guitar page */
 
@@ -177,16 +179,17 @@ video {
     max-height: 90vh;
     max-width: 100%;
     width: auto;
+    padding-bottom: 1rem;
 }
 }
 
 .album-photo {
-    max-height: 90vh; /* 100% of the viewport height */
-    /* width: auto; */
+    max-height: 90vh; /* 90% of the viewport height */
     object-fit: contain; /* Ensure image fits within the max-height without distortion */
-    display: block; /* Prevent images from being inline */
-    margin: 0 auto; /* Center the image horizontally */
+    display: block; 
+    margin: 0 auto; 
     max-width: 100%;
+    padding-bottom: 1rem;
 }
 
 /* utility classes */

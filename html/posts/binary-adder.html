@@ -1,140 +1,384 @@
 {% extends "base.html" %}
 
+{% block internal_stylesheet %}
+<style>
+    .physical-project-simulator-grid {
+        display:grid;
+        justify-items: center;
+        grid-template-columns: 2fr 1fr 2fr;
+        grid-template-rows: auto;
+        row-gap: 4px;
+        grid-template-areas: 
+            "a      led-a decimal-a"
+            "plus   .     .        "
+            "b      led-b decimal-b"
+            "equals .     .        "
+            "c      led-c decimal-c";
+        max-height: 100%;
+        border: 2px solid;
+        border-radius: 10px;
+        padding: 4px;
+        margin-bottom: 1rem;
+    }
+
+    @media screen and (min-width: 480px) {
+    .physical-project-simulator-grid {
+        display:grid;
+        justify-items: center;
+        align-items: center;
+        grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+        grid-template-rows: auto;
+        row-gap: 8px;
+        grid-template-areas: 
+            "a plus b equals c"
+            "led-a . led-b . led-c"
+            "decimal-a . decimal-b . decimal-c";
+        max-height: 100%;
+        border: 2px solid;
+        border-radius: 10px;
+        padding: 4px;
+        margin-bottom: 1rem;
+    }
+    }
+
+    .item-a {
+        grid-area: a;
+    }
+    .item-plus {
+        grid-area: plus;
+    }
+    .item-b {
+        grid-area: b;
+    }
+    .item-equals {
+        grid-area: equals;
+    }
+    .item-c {
+        grid-area: c
+    }
+    .item-led-a {
+        grid-area: led-a;
+        justify-self: end;
+    }
+    .item-led-b {
+        grid-area: led-b;
+        justify-self: end;
+    }
+    .item-led-c {
+        grid-area: led-c;
+        justify-self: end;
+    }
+
+    @media screen and (min-width: 480px) {
+    .item-led-a {
+        grid-area: led-a;
+        justify-self: center;
+    }
+    .item-led-b {
+        grid-area: led-b;
+        justify-self: center;
+    }
+    .item-led-c {
+        grid-area: led-c;
+        justify-self: center;
+    }
+    }
+
+    .item-decimal-a {
+        grid-area: decimal-a;
+    }
+    .item-decimal-b {
+        grid-area: decimal-b;
+    }
+    .item-decimal-c {
+        grid-area: decimal-c;
+    }
+
+    .input-a-leds {
+        width: 4em;
+        display: grid;
+        grid-template-columns: 1em 1em 1em 1em;
+        justify-content: center;
+    }
+    .input-b-leds {
+        width: 4em;
+        display: grid;
+        grid-template-columns: 1em 1em 1em 1em;
+        justify-content: center;
+    }
+    .output-c-leds {
+        width: 5em;
+        display: grid;
+        grid-template-columns: 1em 1em 1em 1em 1em;
+        justify-content: center;
+        align-self: center    }
+
+    input[type="checkbox"] {
+        -webkit-appearance: none;
+        appearance: none;
+        background-color: #fff;
+        margin: 0;
+        display: grid;
+        place-content: center;
+    }
+
+    input[type="checkbox"]::before {
+        content: "";
+        width: 1em;
+        height: 1em;
+        border-radius: 50%;
+        transition: box-shadow 200ms ease;
+    }
+
+    .input-a-leds input[type="checkbox"]::before {
+        box-shadow: inset 1em 1em #330000;
+    }
+
+    .input-a-leds input[type="checkbox"]:checked::before {
+        box-shadow: inset 1em 1em #FF0000;
+    }
+
+    .input-b-leds input[type="checkbox"]::before {
+        box-shadow: inset 1em 1em #332B00;
+    }
+
+    .input-b-leds input[type="checkbox"]:checked::before {
+        box-shadow: inset 1em 1em #FFB000;
+    }
+
+    .output-c-leds input[type="checkbox"]::before {
+        box-shadow: inset 1em 1em #000033;
+    }
+
+    .output-c-leds input[type="checkbox"]:checked::before {
+        box-shadow: inset 1em 1em #0073E6;
+    }
+</style>
+{% endblock internal_stylesheet %}
+
+{% block internal_js %}
+<script>
+    class View {
+        constructor() {
+            this.outputLeds = document
+                .querySelector('.output-c-leds')
+                .querySelectorAll('input[type="checkbox"]')
+            this.decimalADisplay = document.querySelector('.item-decimal-a')
+            this.decimalBDisplay = document.querySelector('.item-decimal-b')
+            this.decimalCDisplay = document.querySelector('.item-decimal-c')
+        }
+        
+        updateView(aLeds, bLeds) {
+            const aDecimalValue = Array.from(aLeds).reduce((sum, checkbox, index) => {
+                return checkbox.checked ? sum + (2 ** (3 - index)) : sum
+            }, 0)
+
+            const bDecimalValue = Array.from(bLeds).reduce((sum, checkbox, index) => {
+                return checkbox.checked ? sum + (2 ** (3 - index)) : sum
+            }, 0)
+            
+            const aBinaryString = aDecimalValue.toString(2).padStart(4, '0')
+            const bBinaryString = bDecimalValue.toString(2).padStart(4, '0')
+
+            const cDecimalValue = aDecimalValue + bDecimalValue
+            const cBinaryString = cDecimalValue.toString(2).padStart(5, '0')
+
+            this.decimalADisplay.textContent = aDecimalValue
+            this.decimalBDisplay.textContent = bDecimalValue
+            this.decimalCDisplay.textContent = cDecimalValue
+
+            Array.from(this.outputLeds).map((led, index) => {
+                this.outputLeds[index].checked = cBinaryString[index] === "1"
+            })
+        }
+    }
+
+    const view = new View()
+
+    const aLedsForm = document.querySelector('.input-a-leds');
+    const aLeds = aLedsForm.querySelectorAll('input[type="checkbox"]')
+    const bLedsForm = document.querySelector('.input-b-leds');
+    const bLeds = bLedsForm.querySelectorAll('input[type="checkbox"]')
+
+    aLedsForm.addEventListener('change', _ => {
+        view.updateView(aLeds, bLeds)
+    })
+    bLedsForm.addEventListener('change', _ => {
+        view.updateView(aLeds, bLeds)
+    })
+</script>
+{% endblock internal_js %}
+
 {% block content %}
     <div class="main-container">
         <h1 class="page-heading bottom-padding-05">Making a binary adder toy with scrap wood</h1>
-        <p class="meta-info bottom-padding-15">October 8, 2023</p>
+        <p class="meta-info bottom-padding-15">October 8, 2023 (edited January 11, 2025)</p>
         <div class="blog-content">
+            
             <p>
-                My niece has a toy that I constantly find myself playing with when I visit. It's a simple wooden box with some switches and LEDs on the front. Electronics wise, the switches are just wired to toggle certain LEDs but it's very fun to fiddle with and I find the overall design with the wooden enclosure very satisfying. For a long time I thought it would be cool to make something with a similar wooden enclosure that does something a bit more involved. This fall, I finally got around to following through with this idea and made something in the same spirit as my nieces toy except the LEDs and switches are connected to a binary adder. 
+                My niece has a cute little toy with some switches and LEDs in a nice wooden enclosure that I like to fiddle with. The toy is meant for young children so the interaction is limited. I thought it would be fun to make something similar but with a sprinkle of digital logic. A binary adder sounded like something I could accomplish using a bit of spare time over the summer.
             </p>
+
+                <figure class="blog-content-figure">
+                    <img src="/images/posts/binary-adder/finished.jpeg"
+                         alt="A wooden box with a row of thirteen coloured LEDs at the top and a row of eight switches at the bottom"
+                         loading="lazy" 
+                         class="blog-content-img"
+                    />
+                    <figcaption class="blog-content-figcaption">The finished project</figcaption>
+                </figure>
+
             <p>
-                I made it with a scrap piece of wood from my yard and a 74LS83 chip. The chip has all the logic for adding two binary numbers in a nice little breadboard friendly package. 
+                I made it with a hollowed out piece of scrap wood. It has a line of thirteen LEDs controlled by eight switches. From left to right, the first four LEDs are red and represent the first number to be added. The next four LEDs are yellow and represent the second number to be added. The last five LEDs are blue and represent the result. If you're familiar with binary numbers, the next couple of examples should showcase the working adder. If you're not familiar with binary numbers, there's an interactive example coming up that might help build some intuition. 
             </p>
-            <figure>
-                <img src="/images/posts/binary-adder/finished.jpeg"
-                     alt="A wooden box with a row of thirteen coloured LEDs at the top and a row of eight switches at the bottom"
-                     loading="lazy" 
-                     class="blog-photo"
-                />
-                <figcaption>The finished project</figcaption>
-            </figure>
-            <h2 class="page-subheading">How it works</h2>
-            <p>
-                The top row of LEDs is divided into three numbers. Starting from the left, the first four LEDs are red and represent the first number to be added. The next four LEDs are yellow and represent the second number to be added. The next five LEDs are blue and represent the resulting sum. The bottom row of switches control the numbers to be added, so the first four switches from the left control the red LEDs, and the next four switches control the yellow LEDs.
-            </p>
-            <p>
-                Let's look at some examples.
-            </p>
-            <p>
-                The following image shows the adder set to 1 + 1. In binary this is 0001 + 0001 = 00010, the LEDs that are on represent 1's and the LEDs that are off represent 0's.
-            </p>
-            <figure>
+
+            <figure class="blog-content-figure">
                 <img src="/images/posts/binary-adder/example1.jpeg"
                      alt="The LEDs showing the addition of 1 + 1"
                      loading="lazy"
-                     class="blog-photo"
+                     class="blog-content-img"
                 />
-                <figcaption>1 + 1 = 2</figcaption>
+                <figcaption class="blog-content-figcaption">1 + 1 = 2</figcaption>
             </figure>
-            <p>
-                The following image shows the addtion of 7 + 3 or 0111 + 0011 = 01010 in binary.
-            </p>
-            <figure>
+
+            <figure class="blog-content-figure">
                 <img src="/images/posts/binary-adder/example2.jpeg"
                      alt="The LEDs showing the addition of 1 + 1"
                      loading="lazy"
-                     class="blog-photo"
+                     class="blog-content-img"
                 />
-                <figcaption>7 + 3 = 10</figcaption>
+                <figcaption class="blog-content-figcaption">7 + 3 = 10</figcaption>
             </figure>
-            <p>
-                The final example shows the fifth bit of the sum being used. This illustrates how you need five bits to add two four-bit numbers together due to overflow.
-            </p>
-            <figure>
+
+            <figure class="blog-content-figure">
                 <img src="/images/posts/binary-adder/example3.jpeg"
                         alt="The LEDs showing the addition of 1 + 1"
                         loading="lazy"
-                        class="blog-photo"
+                        class="blog-content-img"
                 />
-                <figcaption>1 + 15 = 16</figcaption>
+                <figcaption class="blog-content-figcaption">1 + 15 = 16</figcaption>
             </figure>
-            <h2 class="page-subheading">Making it</h2>
+
             <p>
-                The circuit is straightfoward, I followed the <a href="/resources/7483.pdf">data sheet</a> for the 74LS83 chip to connect LEDs to the inputs and outputs. Then I added switches to control the inputs. The circuit is powered with a mini-USB breakout board. The breadboard circuit is what is used in the enclosure because I estimated it would be small enough to fit and I didn't want to go through the trouble of soldering a protytype board.
+                The box below emulates the behavior of the adder. Click on the red and yellow circles to see the result in the blue circles. If you're not familiar with binary, it's a different numbering system where, instead of having ten possible symbols per digit (0 through 9), there are only two: 0 and 1. Digital electronics are made using transistors which can be thought of as on-off switches that are controlled with electricity. Since we only have on-off states to work with, it makes sense to work with numbers in this binary system. 
             </p>
-            <figure>
-                <img src="/images/posts/binary-adder/circuit.jpeg"
-                        alt="Breadboard circuit for the adder"
+
+            <div class="physical-project-simulator-grid">
+                <!-- css grid items -->
+                <div class="item-a">a</div>  
+                <div class="item-plus">+</div>
+                <div class="item-b">b</div>
+                <div class="item-equals">=</div>
+                <div class="item-c">c</div>
+                <form class="item-led-a input-a-leds">
+                    <input type="checkbox">
+                    <input type="checkbox">
+                    <input type="checkbox">
+                    <input type="checkbox">
+                </form>
+                <form class="item-led-b input-b-leds">
+                    <input type="checkbox">
+                    <input type="checkbox">
+                    <input type="checkbox">
+                    <input type="checkbox">
+                </form>
+                <form class="item-led-c output-c-leds">
+                    <input type="checkbox" disabled>
+                    <input type="checkbox" disabled>
+                    <input type="checkbox" disabled>
+                    <input type="checkbox" disabled>
+                    <input type="checkbox" disabled>
+                </form>
+                <div class="item-decimal-a">0</div>
+                <div class="item-decimal-b">0</div>
+                <div class="item-decimal-c">0</div>
+            </div>
+
+            <p>
+                The adding is done with a single 74LS83 chip. This is part of a family of chips that were popular in the 60s to the 80s for building computers and other electronics. Today, they are still useful for learning digital logic. The <a href="/resources/7483.pdf">data sheet</a> provides a pin diagram showing how to wire up the chip:
+            </p>
+
+            <figure class="blog-content-figure">
+                <img src="/images/posts/binary-adder/7483-pin-diagram.png"
+                        alt="The pin diagram"
                         loading="lazy"
-                        class="blog-photo"
+                        class="blog-content-img"
                 />
-                <figcaption>The breadboard circuit</figcaption>
+                <figcaption class="blog-content-figcaption">The pin diagram</figcaption>
             </figure>
+
             <p>
-                For the enclosure I took a scrap piece of 2x6 from the backyard, cut off a portion for the back, and hollowed it out with a drill press.
+                VCC and GND are for powering the chip. The A and B pins are the inputs for the numbers to be added where A1 and B1 are the least significant bits, and A4 and B4 are the most significant. If you're not familiar with the term "least significant", it just means the rightmost digit (it contributes the least to the overall number), so, using a decimal number like 5129, the rightmost number "9" is the least significant. It's the same for a binary number like 1000, where it would be broken down as A1=0 (least significant), A2=0, A3=0, A4=1 (most significant). The Σ pins are the outputs for the resulting number from adding A and B. The output is a bit more complicated since we actually use COUT (stands for carry out) as the most significant bit, so we have five bits to represent the result. If you look at the previous example of adding 15 + 1 you'll see that adding the two four-bit numbers needs a fifth bit to represent the result. This is like how adding two single digit numbers like 9 + 1 needs two digits to represent the result of 10. The CIN (stands for carry in) pin is used for connecting multiple 74LS83 chips together by connecting one chips COUT pin to anothers CIN pin for adding larger numbers. You can chain multiple together this way.
             </p>
-            <figure>
+
+            <p>
+                For the enclosure I took a piece of 2x6 from a scrap pile in the yard, cut about a centimeter off the back, and hollowed out the larger remaining piece. Layer by layer, I painstakingly used a drillpress to hollow it out, thinking the whole time that there has to be a faster way of doing it. Nothing more efficient came to mind so I pressed on, and a couple of hours later I had a hollowed out piece of wood:
+            </p>
+
+            <figure class="blog-content-figure">
                 <img src="/images/posts/binary-adder/hollowing.jpeg"
                         alt="A piece of wood being hollowed with drill press"
                         loading="lazy"
-                        class="blog-photo"
+                        class="blog-content-img"
                 />
-                <figcaption>Starting to hollow the enclosure</figcaption>
+                <figcaption class="blog-content-figcaption">Starting to hollow the enclosure</figcaption>
             </figure>
-            <figure>
+            <figure class="blog-content-figure">
                 <img src="/images/posts/binary-adder/hollowed.jpeg"
                         alt="A hollowed out 2x6 piece of wood"
                         loading="lazy"
-                        class="blog-photo"
+                        class="blog-content-img"
                 />
-                <figcaption>The hollowed out enclosure</figcaption>
+                <figcaption class="blog-content-figcaption">The hollowed out enclosure</figcaption>
             </figure>
+
             <p>
-                Then holes were drilled for the LEDs and switches on the front. A hole was drilled into the side for a power switch and another hole was drilled into the back for the usb connector. 
+                Then holes were drilled for the LEDs and switches on the front. A hole was drilled into the side for a power switch and another hole was drilled into the back for the usb power connector. 
             </p>
-            <figure>
+
+            <figure class="blog-content-figure">
                 <img src="/images/posts/binary-adder/holes.jpeg"
                         alt="Holes drilled into the enclosure"
                         loading="lazy"
-                        class="blog-photo"
+                        class="blog-content-img"
                 />
-                <figcaption>Drill holes</figcaption>
+                <figcaption class="blog-content-figcaption">Drill holes</figcaption>
             </figure>
+
             <p>
-                After some sanding and a thin coat of finish, it's ready to be assembled.
+                After some sanding and a thin coat of finish, it's ready to be assembled. I didn't go through the process of making a proper circuit board and just used a small breadboard to put inside the enclosure.
             </p>
-            <figure>
+
+            <figure class="blog-content-figure">
                 <img src="/images/posts/binary-adder/ready-to-assemble.jpeg"
                         alt="Sanded and finished enclosure"
                         loading="lazy"
-                        class="blog-photo"
+                        class="blog-content-img"
                 />
-                <figcaption>Sanded and ready for assembling</figcaption>
+                <figcaption class="blog-content-figcaption">Sanded and ready for assembling</figcaption>
             </figure>
-            <p>
-                Then it was just a matter of mounting the LEDs and switches. Panel mount LED holders made this a breeze. 
-            </p>
-            <figure>
+
+            <figure class="blog-content-figure">
                 <img src="/images/posts/binary-adder/testing.jpeg"
                         alt="Showing the inside of the enclosure with the ciruit inside"
                         loading="lazy"
-                        class="blog-photo"
+                        class="blog-content-img"
                 />
-                <figcaption>Assembling</figcaption>
+                <figcaption class="blog-content-figcaption">Assembling</figcaption>
             </figure>
-            <h2 class="page-subheading">Conclusion</h2>
-            <p>
-                Being a software developper, it's fun to show off a physical project to people. Originally, I wanted it to be battery powered like my nieces toy but space inside the enclosure ended up being too tight so I stuck with the USB connector. This worked out for the best since now I like to have it sitting on my desk turned on as a decoration.
-            </p>
-            <figure>
+
+            <figure class="blog-content-figure">
                 <img src="/images/posts/binary-adder/desk.jpeg"
                         alt="The finished project on a desk"
                         loading="lazy"
-                        class="blog-photo"
+                        class="blog-content-img"
                 />
-                <figcaption>This is where it lives now</figcaption>
+                <figcaption class="blog-content-figcaption">It makes a nice decoration</figcaption>
             </figure>
+
+            <p>
+                Overall I'm happy with how it looks and functions but there's a couple things I'm not satisfied with. The biggest thing is I ordered the wrong switches. I should have ordered simple on-off switches with two pins. Instead, I ordered what are called single pole double throw (SPDT) switches which have three positions instead of just on and off. I decided to go ahead and finish the project with these switches and have come to regret it as the middle positions put it in an invalid state. I also found shoving the breadboard inside pretty inelegant and could have at least made a prototype circuit.
+            </p>
         </div>
     </div>
 {% endblock content %}
