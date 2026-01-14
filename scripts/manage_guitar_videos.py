@@ -22,13 +22,14 @@ def make_parser():
     return parser
 
 def make_client():
+    config = Config()
     session = boto3.session.Session()
     return session.client(
         's3',
         region_name='tor1',
         endpoint_url='https://tor1.digitaloceanspaces.com',
-        aws_access_key_id=Config.api_access_key,
-        aws_secret_access_key=Config.api_secret_key
+        aws_access_key_id=config.api_access_key,
+        aws_secret_access_key=config.api_secret_key
     )
 
 def get_video_keys(client):
@@ -40,8 +41,6 @@ def get_video_keys(client):
 
 def upload():
     client = make_client()
-    response = client.list_buckets()
-
     response = client.list_objects_v2(Bucket=bucket_name)
     cloud_videos = []
     if response['KeyCount']:
