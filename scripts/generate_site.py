@@ -20,7 +20,6 @@ def copy_files(config: AbstractConfig):
     shutil.copyfile(
         f'{config.project_root}/style.css', 
         f'{config.generated_site_root}/style.css')
-    shutil.copytree('images', f'{config.generated_site_root}/images')
     shutil.copytree('resources', f'{config.generated_site_root}/resources')
 
 def generate_html(config: AbstractConfig):
