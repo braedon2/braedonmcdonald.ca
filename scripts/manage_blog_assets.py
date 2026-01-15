@@ -4,7 +4,7 @@ import boto3
 from website_generation.photo_album.config import Config
 from website_generation.photo_album.photo_album_filesystem import resize_image
 
-bucketname = 'braedonmcdonaldblogpostassets'
+bucket_name = 'braedonmcdonaldblogpostassets'
 assets_root = 'images/posts'
 posts_root = 'html/posts'
 
@@ -34,6 +34,13 @@ def make_client():
         aws_secret_access_key=config.api_secret_key
     )
 
+def get_asset_keys(client, prefix):
+    response = client.list_objects_v2(Bucket=bucket_name, Prefix=prefix)
+    asset_keys = []
+    if response['KeyCount']:
+        video_keys = [video['Key'] for video in response['Contents']]
+    return video_keys
+
 def upload():
     client = make_client()
     post_names = [post.replace('.html', '') for post in os.listdir(posts_root)]
@@ -50,7 +57,7 @@ def upload():
                 print(f'    Resizing {asset}')
                 resize_image(os.path.join(assets_root, post_name), asset)
 
-        cloud_assets = client.list_objects_v2(Bucket=bucketname, Prefix=post_name)
+        cloud_assets = client.list_objects_v2(Bucket=bucket_name, Prefix=post_name)
         local_assets = os.listdir(assets_path)
 
         if set(local_assets) == set(cloud_assets):
@@ -60,8 +67,24 @@ def upload():
                 asset_path = os.path.join(assets_path, asset)
                 if asset not in cloud_assets:
                     print(f'    Uploading {asset}')
-                    client.upload_file(asset_path, bucketname, f'{post_name}/{asset}', ExtraArgs={'ACL': 'public-read'})
+                    client.upload_file(asset_path, bucket_name, f'{post_name}/{asset}', ExtraArgs={'ACL': 'public-read'})
     print('Done')
+
+def restore():
+    client = make_client()
+    post_names = [post.replace('.html', '') for post in os.listdir(posts_root)]
+
+    for post_name in post_names:
+        print(f'Restoring assets for {post_name}...')
+        post_assets_dir = os.path.join(assets_root, post_name)
+
+        if not os.path.isdir(post_assets_dir):
+            os.mkdir(post_assets_dir)
+
+        cloud_asset_keys = get_asset_keys(client, post_name)
+        for cloud_asset_key in cloud_asset_keys:
+            print(f'    Restoring {cloud_asset_key.replace(post_name + '/', '')}...')
+            client.download_file(bucket_name, cloud_asset_key, f'{assets_root}/{cloud_asset_key}')
 
 if __name__ == '__main__':
     parser = make_parser()
@@ -69,3 +92,6 @@ if __name__ == '__main__':
     if args.upload:
         print('Uploading blog assets...')
         upload()
+    if args.restore:
+        print('Restoring blog assets...')
+        restore()
