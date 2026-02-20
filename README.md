@@ -20,6 +20,7 @@ The most common workflow is creating a new album and adding photos to it
   * Example valid directory names
     * Trip-to-place_Aug-2020
     * Trip_2020
+    * Trip_May-2020_Aug-2020 (technically supported although I've yet to use it)
 * Add pictures to the new directory
 * Rotate photos as needed before running the scripts
 * From the root of the project run `source venv/bin/activate`
@@ -29,7 +30,7 @@ The most common workflow is creating a new album and adding photos to it
 * Run `python scripts/generate_site.py`
 * cd into `generated` directory and run `python -m http.server` and verify the site generated properly
 * Run `python scripts/manage_photo_albums_db.py --backup`
-* Run `./publish`
+* Run `firebase deploy`
 
 # Project setup
 
