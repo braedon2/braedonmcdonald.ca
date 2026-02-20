@@ -21,6 +21,10 @@ def copy_files(config: AbstractConfig):
         f'{config.project_root}/style.css', 
         f'{config.generated_site_root}/style.css')
     shutil.copytree('resources', f'{config.generated_site_root}/resources')
+    shutil.copytree(
+        'images', 
+        f'{config.generated_site_root}/images', 
+        ignore=lambda dir, contents: ['posts'])
 
 def generate_html(config: AbstractConfig):
     template_env = Environment(loader=FileSystemLoader(config.templates_path))
