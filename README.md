@@ -32,6 +32,14 @@ The most common workflow is creating a new album and adding photos to it
 * Run `python scripts/manage_photo_albums_db.py --backup`
 * Run `firebase deploy`
 
+Another common workflow is creating a new blogpost
+
+* Make a local branch for the blog post with `git branch <name of branch>`
+* Push the local branch to github with `git push -u origin <name of branch>`
+* Make a new file in `html/posts` called `<name of post>.html`
+* Make a folder in `images/posts` and give it the same name as the post but without the `.html` extension
+* Add photos to the images folder and upload them with `python scrips/manage_blog_assets.py --upload`
+
 # Project setup
 
 Read the entire section before starting! These are the steps for setting up the project on a new machine or after a fresh git clone.
@@ -48,6 +56,7 @@ Read the entire section before starting! These are the steps for setting up the 
 * Run `python scripts/manage_photo_albums_db.py --restore`
 * Run `python scripts/manage_photo_albums.py --restore`
 * Run `python scripts/manage_guitar_videos.py --restore`
+* Run `python scripts/manage_blog_assets.py --restore`
 * Add public ssh key to server's `.ssh/authorized_keys` 
 
 ## Potential Problems
@@ -122,7 +131,7 @@ Run `pytest` from project root.
 
 # Using The Scripts
 
-The `website_generation` folder contains scripts for backing up photo albums,
+The `scrips` folder contains scripts for backing up photo albums,
 backing up guitar videos, and generating the website's html files. The scripts 
 are based around three things: The local filesystem, a local SQLite database,
 and a few cloud based object storage buckets. Photo albums backed up to the 
@@ -189,6 +198,11 @@ titles. Selecting from the list will show the albums photos. From there the
 photos can be rearranged and the save button will become active. Clicking the
 save button will save the new order in the local database so that the next 
 call the `generate_site.py` will reflect the new order.
+
+## manage_blog_assets.py
+
+This is for uploading and restoring images in the `images/posts` folder which are
+used witin blog posts.
 
 ## publish.sh
 
