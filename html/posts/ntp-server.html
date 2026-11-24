@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="main-container">
+        <h1 class="page-heading bottom-padding-05">Setting up a server for the NTP Pool Project</h1>
+        <p class="meta-info bottom-padding-15">November 22, 2026</p>
+        <div class="blog-content">
+            <p>
+                I read a Hacker News post about how easy it is to set up an NTP server for the
+                <a href="https://www.ntppool.org/en/">NTP Pool Project</a>. The idea of having 
+                my existing server that hosts my personal website also be a part of this cluster
+                of time servers sounded intersesting to me so I decided to look into it. In the end,
+                It ended up requiring quite a bit of research before I got it up and running and
+                this post will describe how I got there. 
+            </p>
+            <p>
+                NTP stands for <a href="https://en.wikipedia.org/wiki/Network_Time_Protocol">Network Time Protocol</a>
+                and allows machines to synchronize their time over packet switched networks, such as the internet. The 
+                NTP Pool Project provides a service that allows you to sync your time to their pool of servers spread
+                across the globe. The pool will try to select the best servers for you so your time can be as accurate
+                as possible. The central infrastructure that manages the time-servers as well as the time servers themselves
+                are volunteer driven, anyone can add themselves to the pool and contribute.
+            </p>
+            <p>
+                One thing to note if you're not familiar with the protocol is server hierarchy. At the very top of the 
+                hierarchy you have what are known as reference clocks. These are extremely accurate time keeping devices,
+                the best known of which might be <a href="https://en.wikipedia.org/wiki/Atomic_clock">atomic clocks</a>. 
+                These devices sit at stratum 0 but they cannot be queried directly. Stratum 1 servers, have their time 
+                synced to within a few microseconds of their stratum 0 device. Stratum 2 servers connect to stratum 1 
+                servers and so on. It's a bit more complicated than that but it's not worth going into for this post.
+            </p>
+            <figure class="blog-content-figure">
+                <a href="https://commons.wikimedia.org/wiki/File:Network_Time_Protocol_servers_and_clients.svg#/media/File:Network_Time_Protocol_servers_and_clients.svg">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/c/c9/Network_Time_Protocol_servers_and_clients.svg?utm_source=en.wikipedia.org&amp;utm_campaign=imageinfo&amp;utm_content=original" 
+                        alt="Network Time Protocol servers and clients.svg"
+                        class="blog-content-img"
+                    />
+                </a>
+                <figcaption class="blog-content-figcaption">The server hierarchy. Click the image to go to wikimedia</figcaption>
+            </figure>
+        </div>
+    </div>
+{% endblock content %}
+    
