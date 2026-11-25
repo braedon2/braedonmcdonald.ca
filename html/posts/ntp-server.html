@@ -38,6 +38,69 @@
                 </a>
                 <figcaption class="blog-content-figcaption">The server hierarchy. Click the image to go to wikimedia</figcaption>
             </figure>
+            <p>
+                I chose to use <a href="https://chrony-project.org/">chrony</a> as the actual NTP implementation to run 
+                on my server. Reading through forum posts convinced me to use it over 
+                <a href="https://www.ntp.org/documentation/4.2.8-series/ntpd/">ntpd</a> which is considered a legacy
+                implementation.
+            </p>
+            <p>
+                The first part of my configuration file looks like this:
+            </p>
+            <pre>
+server ntp.torix.ca iburst
+server time.nrc.ca iburst
+server time.chu.nrc.ca iburst
+server ntp.cpsc.ucalgary.ca iburst
+server timelord.uregina.ca iburst
+            </pre>
+            <p>
+                These are the servers my chrony instance will use to synchronize its time. I found these servers using 
+                a <a href="https://support.ntp.org/Servers/StratumTwoTimeServers/">public listing of time servers</a>. 
+                The NTP Pool Project recommends having at least four and no more than seven servers. Chrony needs 
+                three servers to come to a consensus and the rest are for redundancy. 
+            </p>
+            <p>
+                I chose a server in Toronto (torix) because that's where my server is located. Then I 
+                chose two servers in Ottawa provided by the 
+                <a href="https://nrc.canada.ca/en/certifications-evaluations-standards/canadas-official-time/network-time-protocol-ntp">
+                    National Research Council of Canada
+                </a>
+                because that's pretty close to Toronto and I think it's cool to use servers from the NRC. Then I chose a couple 
+                more servers from out west for redundancy. Using all Canadian servers was just for fun!
+            </p>
+            <p>The rest of the configuration file looks like this:</p>
+            <pre>
+driftfile /var/lib/chrony/chrony.drift
+dumpdir /var/run/chrony
+rtcsync
+makestep 1.0 3
+allow
+
+# Use 50,000,000 bytes of memory to keep track how many requests each client is
+# sending to rate limit to 8 requests per IP per second after a burst of 16 
+# requests
+clientloglimit 50000000
+ratelimit interval -3 burst 16
+
+# Uncomment the following line to turn logging on.
+#log tracking measurements statistics
+#logdir /var/log/chrony
+
+# Get TAI-UTC offset and leap seconds from the system tz database.
+# This directive must be commented out when using time sources serving
+# leap-smeared time.
+leapsectz right/UTC
+            </pre>
+            <p>
+                Most of the information for this section of the configuration was found in the 
+                <a href="https://chrony-project.org/doc/latest/chrony.conf.html#examples">chrony examples documentation</a>. 
+                The most important line is the <code>allow</code> directive which allows client connections from all addresses
+                making it a server instead of just a client. I added the rate limit stuff after reading 
+                <a href="https://community.ntppool.org/t/tips-tricks-for-a-new-ntp-server-operator/4708?utm_source=chatgpt.com">
+                    this discussion.
+                </a>
+            </p>
         </div>
     </div>
 {% endblock content %}
