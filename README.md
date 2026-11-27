@@ -89,7 +89,7 @@ server {
 	listen 80;
 	listen [::]:80;
 
-	root /home/braedonmcdonald/braedonmcdonald.ca;
+	root /var/www/braedonmcdonald.ca;
 	index index.html;
 
 	location / {
