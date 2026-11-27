@@ -59,8 +59,6 @@ server timelord.uregina.ca iburst
                 a <a href="https://support.ntp.org/Servers/StratumTwoTimeServers/">public listing of time servers</a>. 
                 The NTP Pool Project recommends having at least four and no more than seven servers. Chrony needs 
                 three servers to come to a consensus and the rest are for redundancy. 
-            </p>
-            <p>
                 I chose a server in Toronto (torix) because that's where my server is located. Then I 
                 chose two servers in Ottawa provided by the 
                 <a href="https://nrc.canada.ca/en/certifications-evaluations-standards/canadas-official-time/network-time-protocol-ntp">
@@ -69,7 +67,62 @@ server timelord.uregina.ca iburst
                 because that's pretty close to Toronto and I think it's cool to use servers from the NRC. Then I chose a couple 
                 more servers from out west for redundancy. Using all Canadian servers was just for fun!
             </p>
-            <p>The rest of the configuration file looks like this:</p>
+            <p>
+                Let's see how the servers are behaving:
+            </p>
+            <pre>
+my-server:~# chronyc sources
+
+MS Name/IP address         Stratum Poll Reach LastRx Last sample               
+===============================================================================
+^* ntp2.torix.ca                 1  10   377   909    -40us[  -52us] +/- 2219us
+^- time13.nrc.ca                 2  10   377   721   +306us[ +306us] +/- 8232us
+^- time1.chu.nrc.ca              2  10   377   634  +1058us[+1058us] +/-   12ms
+^- ns2.cpsc.ucalgary.ca          2  10   377    34   -171us[ -171us] +/-   72ms
+^- sue.cc.uregina.ca             2  10   377   530   +617us[ +617us] +/-   64ms
+            </pre>
+            <p>
+                The first thing you might notice is the server names in the configuration don't 
+                quite match what's shown in the name column, such as <samp>ntp2.torix.ca</samp> 
+                instead of just <samp>ntp.torix.ca</samp>. This is most likely because the domains used in 
+                the configuration actually distribute the traffic to multiple servers using 
+                <a href="https://en.wikipedia.org/wiki/Round-robin_DNS">round-robin DNS</a>. 
+                Next, you'll see to the far left that there is a star next to <samp>ntp.torix.ca</samp>.
+                This means chrony has chosen it as the best source of time and is using it to synchronize 
+                my servers clock. The number to the far right shows the estimated error. The best 
+                server has an error of around 2 milliseconds which is pretty good considering Wikipedia 
+                says NTP is intended to synchronize to within a few milliseconds. The rest of the sources 
+                are not nearly as good but they serve as good enough backups. Lastly, take a look at the 
+                stratum column. I have a mix of stratum 1 and stratum 2 servers. NTP allows a server to 
+                sync to upstream servers of different strata, it just means that my servers stratum will 
+                be the highest upstream stratum plus one. This makes my server a stratum 3 server.  
+            </p>
+            <p>
+                As a tangent, it can be fun to tell chrony to choose random servers from the NTP Pool and 
+                see who is volunteering their computers to keep the world in sync. You can do this my adding the 
+                line <samp>pool pool.ntp.org iburst maxsources 5</samp> to get five servers from the pool.
+                If you're lucky, some of the listed sources might also have web servers. Note, don't do this 
+                while you are serving traffic as these operators might not want to be upstream servers themselves.
+                Anyway, Lets take a look:
+            </p>
+            <pre>
+MS Name/IP address         Stratum Poll Reach LastRx Last sample               
+===============================================================================
+^- ntp1.yyz.ca.hojmark.net       2   6   377    60  -2815us[-2815us] +/-   21ms
+^- host.ca2.h.wer.ee             3   6   377    61  +1544us[+1469us] +/-   18ms
+^- s-216-232-132-21.bc.hsia>     2   6   177    40  -1594us[-1594us] +/-  267ms
+^* 173-206-125-128.cpe.dist>     1   6   377    60   -523us[ -598us] +/- 5796us
+^+ mail.coreserv.net             2   6   377    59   +780us[ +780us] +/-   12ms
+            </pre>
+            <p>
+                Interesting, interesting... let's take a look at the first entry. Entering 
+                <samp>hojmark.net</samp> into a web browser gives a hit! It brings you to someone's 
+                lovely homepage that appears to have been running since 1994. Clicking around a bit 
+                more and you can find a summary webpage of this operator's time servers over at 
+                <a href="https://time.hojmark.net/">time.hofmark.net</a>. At the time of writing 
+                there are seventeen servers spread across the globe! That is dedication.
+            </p>
+            <p>Getting back on track, the rest of the configuration file looks like this:</p>
             <pre>
 driftfile /var/lib/chrony/chrony.drift
 dumpdir /var/run/chrony
@@ -100,6 +153,7 @@ leapsectz right/UTC
                 <a href="https://community.ntppool.org/t/tips-tricks-for-a-new-ntp-server-operator/4708?utm_source=chatgpt.com">
                     this discussion.
                 </a>
+                I left the logging commented out but might play around with it later.
             </p>
         </div>
     </div>
